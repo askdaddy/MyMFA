@@ -17,29 +17,29 @@
 
 ## 2. 导入矩阵
 
-| 来源 | 载体 | 加密 | 解析要点 | 置信度 |
-|---|---|---|---|---|
-| **Aegis** | `aegis.json` | 明文 | `db.entries[]`，`info.secret` 为 base32 | 高 |
-| **Aegis** | `aegis-encrypted.json` | scrypt + AES-256-GCM | 需实现 **scrypt** 解密（本项目自有 vault 用 Argon2id，scrypt 只在此只读兼容路径出现） | 高 |
-| **Google Authenticator** | `otpauth-migration://offline?data=<b64 protobuf>` | 无 | 解 protobuf `MigrationPayload`，需处理**分片**（`batch_index` / `batch_size`） | 中 |
-| **2FAS** | `2fas-backup.json` | 明文 | `services[].otp{secret, issuer, account, period, digits, algorithm, counter}` | 中 |
-| **2FAS** | 加密备份 | PBKDF2 + AES-GCM | 头部含 salt 与 KDF 参数 | 中 |
-| **Raivio Authenticator** | JSON | PBKDF2-SHA256 + AES-GCM | `payload` 为 base64 密文 | 中 |
-| **FreeOTP / FreeOTP+** | JSON | 明文 | token 数组，`secret` 可能是 **int 数组**而非 base32，需特殊处理 | 中 |
-| **Ente Auth** | `ente-auth-codes.txt` | 明文 | 每行一个 `otpauth://` URI | 高 |
-| **Bitwarden** | CSV | 明文 | `totp` 列，值为 `otpauth://` URI 或裸 base32 | 高 |
-| **1Password** | CSV | 明文 | `totp` 列为 `otpauth://` URI | 高 |
-| **LastPass** | CSV | 明文 | 专有列结构 | 低 |
-| **通用 otpauth** | `.txt` / `.csv` | 明文 | 每行一个 `otpauth://` URI | 高 |
-| **通用 CSV** | `.csv` | 明文 | 需支持列名映射（用户手动指定哪列是 secret / issuer / account） | 高 |
-| **本 App** | `.mfavault` | Argon2id + AES-256-GCM | 见 [vault-format.md](vault-format.md) | 完全可控 |
+| 来源                     | 载体                                              | 加密                    | 解析要点                                                                              | 置信度   |
+| ------------------------ | ------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------- | -------- |
+| **Aegis**                | `aegis.json`                                      | 明文                    | `db.entries[]`，`info.secret` 为 base32                                               | 高       |
+| **Aegis**                | `aegis-encrypted.json`                            | scrypt + AES-256-GCM    | 需实现 **scrypt** 解密（本项目自有 vault 用 Argon2id，scrypt 只在此只读兼容路径出现） | 高       |
+| **Google Authenticator** | `otpauth-migration://offline?data=<b64 protobuf>` | 无                      | 解 protobuf `MigrationPayload`，需处理**分片**（`batch_index` / `batch_size`）        | 中       |
+| **2FAS**                 | `2fas-backup.json`                                | 明文                    | `services[].otp{secret, issuer, account, period, digits, algorithm, counter}`         | 中       |
+| **2FAS**                 | 加密备份                                          | PBKDF2 + AES-GCM        | 头部含 salt 与 KDF 参数                                                               | 中       |
+| **Raivio Authenticator** | JSON                                              | PBKDF2-SHA256 + AES-GCM | `payload` 为 base64 密文                                                              | 中       |
+| **FreeOTP / FreeOTP+**   | JSON                                              | 明文                    | token 数组，`secret` 可能是 **int 数组**而非 base32，需特殊处理                       | 中       |
+| **Ente Auth**            | `ente-auth-codes.txt`                             | 明文                    | 每行一个 `otpauth://` URI                                                             | 高       |
+| **Bitwarden**            | CSV                                               | 明文                    | `totp` 列，值为 `otpauth://` URI 或裸 base32                                          | 高       |
+| **1Password**            | CSV                                               | 明文                    | `totp` 列为 `otpauth://` URI                                                          | 高       |
+| **LastPass**             | CSV                                               | 明文                    | 专有列结构                                                                            | 低       |
+| **通用 otpauth**         | `.txt` / `.csv`                                   | 明文                    | 每行一个 `otpauth://` URI                                                             | 高       |
+| **通用 CSV**             | `.csv`                                            | 明文                    | 需支持列名映射（用户手动指定哪列是 secret / issuer / account）                        | 高       |
+| **本 App**               | `.mfavault`                                       | Argon2id + AES-256-GCM  | 见 [vault-format.md](vault-format.md)                                                 | 完全可控 |
 
 **明确不支持**：
 
-| 来源 | 原因 |
-|---|---|
-| Authy | 无官方导出格式，密钥存于服务端且绑定设备。社区方案依赖抓取 Twilio 私有 API，不稳定且有账号风险 |
-| Microsoft Authenticator | 无标准导出格式，仅云端备份且绑定微软账号 |
+| 来源                    | 原因                                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Authy                   | 无官方导出格式，密钥存于服务端且绑定设备。社区方案依赖抓取 Twilio 私有 API，不稳定且有账号风险 |
+| Microsoft Authenticator | 无标准导出格式，仅云端备份且绑定微软账号                                                       |
 
 这两项需在导入界面的说明文案与用户文档中明确告知，避免用户误以为功能坏了。
 
@@ -47,30 +47,30 @@
 
 按用户决策，导出侧覆盖到 **Google Authenticator 迁移二维码**：
 
-| 目标格式 | 载体 | 说明 |
-|---|---|---|
-| **本 App 加密 vault** | `.mfavault` | 首选，完整保留 tag / note / sites / 使用统计 / position |
-| **本 App 明文备份** | `.mfavault`（`encrypted: false`） | 需显著风险提示 + 二次确认 |
-| **Aegis 明文** | `aegis.json` | 双向迁移，丢弃本 App 独有字段（`sites` / `position` / `usageCount`） |
-| **Aegis 加密** | `aegis-encrypted.json` | 需实现 **scrypt 加密**路径 |
-| **otpauth URI 文本** | `.txt` | 每行一个 URI，通用性最好 |
-| **批量二维码** | 屏幕显示 | 分屏多张，适配无文件传输通道的场景 |
-| **GA 迁移二维码** | 屏幕显示 | protobuf 编码，需自动分片 |
+| 目标格式              | 载体                              | 说明                                                                 |
+| --------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| **本 App 加密 vault** | `.mfavault`                       | 首选，完整保留 tag / note / sites / 使用统计 / position              |
+| **本 App 明文备份**   | `.mfavault`（`encrypted: false`） | 需显著风险提示 + 二次确认                                            |
+| **Aegis 明文**        | `aegis.json`                      | 双向迁移，丢弃本 App 独有字段（`sites` / `position` / `usageCount`） |
+| **Aegis 加密**        | `aegis-encrypted.json`            | 需实现 **scrypt 加密**路径                                           |
+| **otpauth URI 文本**  | `.txt`                            | 每行一个 URI，通用性最好                                             |
+| **批量二维码**        | 屏幕显示                          | 分屏多张，适配无文件传输通道的场景                                   |
+| **GA 迁移二维码**     | 屏幕显示                          | protobuf 编码，需自动分片                                            |
 
 ### 3.1 字段降级表
 
 导出到通用格式时必然丢失信息，必须在 UI 上明确告知用户丢了什么：
 
-| 字段 | 本 App | Aegis | otpauth URI | GA 迁移码 |
-|---|---|---|---|---|
-| issuer / account / secret | ✅ | ✅ | ✅ | ✅ |
-| algo / digits / period / counter | ✅ | ✅ | ✅ | ✅ |
-| note | ✅ | ✅ | ❌ | ❌ |
-| tags | ✅ | ✅（字符串形式） | ❌ | ❌ |
-| sites（域名绑定） | ✅ | ❌ | ❌ | ❌ |
-| usageCount / lastUsedAt | ✅ | ❌ | ❌ | ❌ |
-| position（手动排序） | ✅ | ⚠️ 数组顺序 | ❌ | ❌ |
-| favorite | ✅ | ❌ | ❌ | ❌ |
+| 字段                             | 本 App | Aegis            | otpauth URI | GA 迁移码 |
+| -------------------------------- | ------ | ---------------- | ----------- | --------- |
+| issuer / account / secret        | ✅     | ✅               | ✅          | ✅        |
+| algo / digits / period / counter | ✅     | ✅               | ✅          | ✅        |
+| note                             | ✅     | ✅               | ❌          | ❌        |
+| tags                             | ✅     | ✅（字符串形式） | ❌          | ❌        |
+| sites（域名绑定）                | ✅     | ❌               | ❌          | ❌        |
+| usageCount / lastUsedAt          | ✅     | ❌               | ❌          | ❌        |
+| position（手动排序）             | ✅     | ⚠️ 数组顺序      | ❌          | ❌        |
+| favorite                         | ✅     | ❌               | ❌          | ❌        |
 
 **导出前必须展示这张降级表**（或其精简版），让用户知道选了某个格式会失去哪些数据。这是防止"导出到别的 App 再导回来发现标签全没了"这类数据丢失投诉的关键。
 
@@ -121,11 +121,11 @@ KDF 参数来自备份文件自身头部，不使用本 App 默认值。Aegis �
 
 导入时按 `(issuer, account, secret)` 三元组判重：
 
-| 情况 | 处理 |
-|---|---|
-| 完全相同 | 跳过，计入"已存在" |
+| 情况                                | 处理                                                 |
+| ----------------------------------- | ---------------------------------------------------- |
+| 完全相同                            | 跳过，计入"已存在"                                   |
 | issuer + account 相同但 secret 不同 | **不自动覆盖**，作为冲突列出，让用户逐条选择保留哪个 |
-| secret 相同但 issuer / account 不同 | 视为新条目导入（同一密钥可能在多处登记） |
+| secret 相同但 issuer / account 不同 | 视为新条目导入（同一密钥可能在多处登记）             |
 
 冲突条目在导入预览界面单独成组展示，默认不导入。
 

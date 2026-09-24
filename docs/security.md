@@ -44,22 +44,22 @@ DEK ── AES-256-GCM ──→ vault 明文（gzip(JSON)）
 
 ### 2.1 生物识别实现要点
 
-| 平台 | 机制 |
-|---|---|
-| iOS | Keychain 存储，访问控制设为 `kSecAccessControlBiometryCurrentSet`，生物特征集合变更时自动失效 |
-| Android | BiometricPrompt（Class 3 / Strong 级别）解锁 Keystore 中的非导出密钥，用该密钥包裹 DEK |
-| Chrome 扩展 | 无生物识别能力，每次会话必须输入主密码；解锁态由 `chrome.storage.session` 在浏览器会话内维持 |
+| 平台        | 机制                                                                                          |
+| ----------- | --------------------------------------------------------------------------------------------- |
+| iOS         | Keychain 存储，访问控制设为 `kSecAccessControlBiometryCurrentSet`，生物特征集合变更时自动失效 |
+| Android     | BiometricPrompt（Class 3 / Strong 级别）解锁 Keystore 中的非导出密钥，用该密钥包裹 DEK        |
+| Chrome 扩展 | 无生物识别能力，每次会话必须输入主密码；解锁态由 `chrome.storage.session` 在浏览器会话内维持  |
 
 Android 侧需处理 `KeyPermanentlyInvalidatedException`（用户新增/删除生物特征），此时静默回退到主密码路径并清除失效的包裹副本。
 
 ## 3. 加密算法与参数
 
-| 项 | 选型 | 参数 |
-|---|---|---|
-| KDF | Argon2id | `m = 64 MiB`、`t = 3`、`p = 4`、`salt = 16B 随机`、输出 32B |
-| AEAD | AES-256-GCM | `nonce = 12B 随机`、`tag = 16B` |
-| 随机数 | 平台 CSPRNG | WebCrypto / SecureRandom / arc4random |
-| 压缩 | gzip | 加密**前**压缩明文 |
+| 项     | 选型        | 参数                                                        |
+| ------ | ----------- | ----------------------------------------------------------- |
+| KDF    | Argon2id    | `m = 64 MiB`、`t = 3`、`p = 4`、`salt = 16B 随机`、输出 32B |
+| AEAD   | AES-256-GCM | `nonce = 12B 随机`、`tag = 16B`                             |
+| 随机数 | 平台 CSPRNG | WebCrypto / SecureRandom / arc4random                       |
+| 压缩   | gzip        | 加密**前**压缩明文                                          |
 
 **参数策略**：
 
@@ -73,11 +73,11 @@ Android 侧需处理 `KeyPermanentlyInvalidatedException`（用户新增/删除�
 
 三端使用不同的 Argon2id 实现：
 
-| 端 | 实现 |
-|---|---|
-| Web / 扩展 / Tauri 前端 | `hash-wasm`（WASM） |
-| Android | argon2-jvm（JNI） |
-| iOS | libsodium `crypto_pwhash`（Argon2id） |
+| 端                      | 实现                                  |
+| ----------------------- | ------------------------------------- |
+| Web / 扩展 / Tauri 前端 | `hash-wasm`（WASM）                   |
+| Android                 | argon2-jvm（JNI）                     |
+| iOS                     | libsodium `crypto_pwhash`（Argon2id） |
 
 **风险**：任一实现的参数解释、内存单位（KiB vs MiB）或输出编码存在偏差，就会导致"手机上加密的 vault 在插件里打不开"这类致命且难以定位的问题。
 
@@ -119,15 +119,15 @@ Chrome 扩展的 service worker 在 popup 关闭后会被回收（通常 30 秒�
 
 ## 7. 运行时防护
 
-| 防护项 | 措施 | 优先级 |
-|---|---|---|
-| 截屏/录屏泄露 | Android `FLAG_SECURE`；iOS 监听截屏事件遮罩；提供设置开关 | 建议默认开启 |
-| 最近任务卡片 | Android 在进入后台时覆盖遮罩层 | 建议默认开启 |
-| 剪贴板残留 | 复制验证码后 30–60 秒自动清空（可关闭） | 默认开启 |
-| 空闲自动锁定 | 可配置超时（默认 60 秒），锁定后需重新解锁 | 默认开启 |
-| 内存中的明文 | 使用完毕后 `Uint8Array.fill(0)` 主动清零，不依赖 GC | 强制 |
-| 日志泄露 | 全局禁止输出 secret / DEK / 主密码 / 验证码；封装 logger 做字段脱敏 | 强制 |
-| 崩溃上报 | 不采集 vault 内容；若接入崩溃上报，须做敏感字段过滤 | 强制 |
+| 防护项        | 措施                                                                | 优先级       |
+| ------------- | ------------------------------------------------------------------- | ------------ |
+| 截屏/录屏泄露 | Android `FLAG_SECURE`；iOS 监听截屏事件遮罩；提供设置开关           | 建议默认开启 |
+| 最近任务卡片  | Android 在进入后台时覆盖遮罩层                                      | 建议默认开启 |
+| 剪贴板残留    | 复制验证码后 30–60 秒自动清空（可关闭）                             | 默认开启     |
+| 空闲自动锁定  | 可配置超时（默认 60 秒），锁定后需重新解锁                          | 默认开启     |
+| 内存中的明文  | 使用完毕后 `Uint8Array.fill(0)` 主动清零，不依赖 GC                 | 强制         |
+| 日志泄露      | 全局禁止输出 secret / DEK / 主密码 / 验证码；封装 logger 做字段脱敏 | 强制         |
+| 崩溃上报      | 不采集 vault 内容；若接入崩溃上报，须做敏感字段过滤                 | 强制         |
 
 > 注：用户在需求确认中选择的是「强制主密码 + 可选生物识别」，未选「自动锁定与防截屏加固」。上表中标注"建议默认开启"的项属于加固增强，实现时作为设置项提供，不阻塞 M3 验收。
 

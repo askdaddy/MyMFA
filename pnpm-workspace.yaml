@@ -1,0 +1,22 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+# 统一版本管理：各包用 "catalog:" 引用，避免跨包版本漂移。
+# typescript 钉死精确版本——typescript-eslint 的 peer 上限是 <6.1.0，
+# 已发布的 TypeScript 7.x 在 ESLint 工具链上尚不可用。
+catalog:
+  typescript: 5.9.3
+  '@types/node': 22.20.4
+  vitest: 5.0.1
+  vite: 8.3.0
+  turbo: 2.11.3
+  eslint: 10.11.0
+  '@eslint/js': 10.0.1
+  typescript-eslint: 8.70.1
+  prettier: 3.9.9
+
+# 由 pnpm 自动写入：全局配置启用了 minimumReleaseAge（新发布包需冷却期，供应链防护），
+# prettier 3.9.9 发布时间过近被显式豁免。升级 prettier 后可删除此项让 pnpm 重新评估。
+minimumReleaseAgeExclude:
+  - prettier@3.9.9

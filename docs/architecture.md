@@ -30,25 +30,31 @@ test/           QA 黑盒测试脚本
 
 ## 3. 依赖方向
 
-严格单向，禁止反向或跨层引用：
+严格单向，禁止反向或跨层引用。依赖只能从上层指向下层：
 
 ```
-apps/mobile ─┐
-apps/extension ─┼─→ domain ─→ vault ─→ transfer
-apps/desktop ─┘              ↓            ↓
-                          crypto ←──── otp
+第 4 层   apps/mobile      apps/extension      apps/desktop
+第 3 层   domain
+第 2 层   vault            transfer
+第 1 层   crypto    otp          （叶子，无内部依赖）
 ```
 
-规则：
+具体到包，允许的内部依赖是一份**白名单**（`eslint.config.js` 中的 `INTERNAL_DEPS`）：
 
-- `otp` 与 `crypto` 是叶子，不依赖任何内部包。
-- `vault` 依赖 `crypto`（加解密）与 `otp`（校验条目参数合法性）。
-- `transfer` 依赖 `vault`（构造 Entry）与 `crypto`（解密他 App 的加密备份）。
-- `domain` 依赖 `vault`（读取条目）。
-- `apps/*` 依赖全部 packages，并负责**注入平台 Provider**。
-- 任何 `packages/*` 禁止 import `apps/*` 或平台 SDK。
+| 包         | 允许依赖                 | 用途                                                            |
+| ---------- | ------------------------ | --------------------------------------------------------------- |
+| `otp`      | —                        | 叶子                                                            |
+| `crypto`   | —                        | 叶子                                                            |
+| `vault`    | `crypto`、`otp`          | 加解密；校验条目参数合法性                                      |
+| `transfer` | `vault`、`crypto`、`otp` | 构造 Entry；解密他 App 的加密备份；otpauth URI 的 base32 编解码 |
+| `domain`   | `vault`                  | 读取条目                                                        |
+| `apps/*`   | 全部 packages            | 并负责**注入平台 Provider**                                     |
 
-这条规则由 ESLint 的 `no-restricted-imports` + `import/no-extraneous-dependencies` 在 CI 强制，不靠人工审查。
+任何 `packages/*` 一律禁止 import `apps/*` 与平台 SDK。
+
+**强制方式**：ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-restricted-globals`（`window`/`chrome`/`process` 等）按 `packages/*` 逐包配置，在 CI 阻断，不靠人工审查。
+
+未声明的第三方依赖不需要额外规则拦截：pnpm 的 `node_modules` 严格隔离，包只能解析到自己 `package.json` 里声明的依赖，漏声明会直接在构建期失败。
 
 ## 4. 包职责详述
 
@@ -73,11 +79,11 @@ apps/desktop ─┘              ↓            ↓
 
 各端实现位置：
 
-| 端 | KDF 实现 | AEAD 实现 |
-|---|---|---|
-| Web / 扩展 / Tauri 前端 | `hash-wasm` 的 argon2id | WebCrypto `crypto.subtle` |
-| Android | argon2-jvm（原生模块） | Android Keystore / Conscrypt |
-| iOS | libsodium `crypto_pwhash`（原生模块） | CryptoKit |
+| 端                      | KDF 实现                              | AEAD 实现                    |
+| ----------------------- | ------------------------------------- | ---------------------------- |
+| Web / 扩展 / Tauri 前端 | `hash-wasm` 的 argon2id               | WebCrypto `crypto.subtle`    |
+| Android                 | argon2-jvm（原生模块）                | Android Keystore / Conscrypt |
+| iOS                     | libsodium `crypto_pwhash`（原生模块） | CryptoKit                    |
 
 三端实现必须通过 [跨端一致性测试](testing.md#3-跨端加密一致性测试最高优先级) 验证字节级一致。
 
@@ -123,23 +129,23 @@ Tauri 2.x，前端复用 `apps/extension` 的 React 组件层，Rust 侧提供 A
 
 ## 6. 构建与工具链
 
-| 项 | 选型 |
-|---|---|
-| 包管理 | pnpm workspaces |
-| 任务编排 | Turborepo（增量构建 + 远程缓存可选） |
-| 语言 | TypeScript `strict: true`，全仓 ESM |
-| 测试 | Vitest |
-| Lint | ESLint（含依赖方向规则）+ Prettier |
-| 提交规范 | Conventional Commits，引用 Issue 编号 |
+| 项         | 选型                                         |
+| ---------- | -------------------------------------------- |
+| 包管理     | pnpm workspaces                              |
+| 任务编排   | Turborepo（增量构建 + 远程缓存可选）         |
+| 语言       | TypeScript `strict: true`，全仓 ESM          |
+| 测试       | Vitest                                       |
+| Lint       | ESLint（含依赖方向规则）+ Prettier           |
+| 提交规范   | Conventional Commits，引用 Issue 编号        |
 | 移动端构建 | Expo prebuild → EAS Build（或本地 fastlane） |
-| 扩展构建 | WXT（Vite 底座，MV3 原生支持） |
+| 扩展构建   | WXT（Vite 底座，MV3 原生支持）               |
 
 ## 7. 关键架构风险
 
-| 风险 | 缓解措施 | 验证阶段 |
-|---|---|---|
-| Argon2id 三端输出不一致 | 官方测试向量 + 跨端字节比对 CI | **M0（必须最早验证）** |
-| RN 加密生态与新架构兼容性 | M0 做最小可运行原型，验证 quick-crypto 可用 | M0 |
-| MV3 SW 回收导致解锁态丢失 | `chrome.storage.session` + 早期原型验证 | M4 前 |
-| 导入格式字段名与文档不符 | 以真实样本为准建立 golden test，不信任二手资料 | M2 |
-| 恶意导入文件导致崩溃或注入 | 解析器纯函数化 + 模糊测试 + 禁用动态执行 | M2 |
+| 风险                       | 缓解措施                                       | 验证阶段               |
+| -------------------------- | ---------------------------------------------- | ---------------------- |
+| Argon2id 三端输出不一致    | 官方测试向量 + 跨端字节比对 CI                 | **M0（必须最早验证）** |
+| RN 加密生态与新架构兼容性  | M0 做最小可运行原型，验证 quick-crypto 可用    | M0                     |
+| MV3 SW 回收导致解锁态丢失  | `chrome.storage.session` + 早期原型验证        | M4 前                  |
+| 导入格式字段名与文档不符   | 以真实样本为准建立 golden test，不信任二手资料 | M2                     |
+| 恶意导入文件导致崩溃或注入 | 解析器纯函数化 + 模糊测试 + 禁用动态执行       | M2                     |

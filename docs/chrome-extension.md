@@ -39,11 +39,11 @@ apps/extension/
 
 脚手架用 **WXT**（Vite 底座，MV3 原生支持，HMR 体验好）。
 
-| 组件 | 职责 |
-|---|---|
+| 组件                          | 职责                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
 | **background service worker** | 持有解锁态、响应 popup 的加解密请求、`chrome.alarms` 空闲锁定、导入导出时的重计算任务 |
-| **popup** | 列表 UI、搜索、复制、倒计时刷新。生命周期短，打开即渲染、关闭即销毁 |
-| **options page** | 导入导出、主密码修改、设置、条目管理（popup 空间太小，重操作放这里） |
+| **popup**                     | 列表 UI、搜索、复制、倒计时刷新。生命周期短，打开即渲染、关闭即销毁                   |
+| **options page**              | 导入导出、主密码修改、设置、条目管理（popup 空间太小，重操作放这里）                  |
 
 **为什么把加解密放 background**：Argon2id 派生在 WASM 下耗时可达数百毫秒至 1 秒，放 popup 会阻塞渲染且 popup 随时可能被销毁。放 SW 中执行，popup 通过 `chrome.runtime.sendMessage` 请求，SW 保持 DEK 与派生结果。
 
@@ -53,17 +53,17 @@ apps/extension/
 {
   "manifest_version": 3,
   "permissions": ["storage", "activeTab", "clipboardWrite", "alarms"],
-  "host_permissions": []          // 刻意留空
+  "host_permissions": [], // 刻意留空
 }
 ```
 
-| 权限 | 用途 | 是否必需 |
-|---|---|---|
-| `storage` | `local` 存加密 vault blob，`session` 存解锁态 DEK | ✅ |
-| `activeTab` | popup 打开时读取当前标签页 URL 做域名匹配 | ✅ |
-| `clipboardWrite` | 点击复制验证码 | ✅ |
-| `alarms` | 空闲自动锁定 | 可选（不用则退化为 SW 内计时，会被回收打断） |
-| `host_permissions` | — | ❌ **不申请** |
+| 权限               | 用途                                              | 是否必需                                     |
+| ------------------ | ------------------------------------------------- | -------------------------------------------- |
+| `storage`          | `local` 存加密 vault blob，`session` 存解锁态 DEK | ✅                                           |
+| `activeTab`        | popup 打开时读取当前标签页 URL 做域名匹配         | ✅                                           |
+| `clipboardWrite`   | 点击复制验证码                                    | ✅                                           |
+| `alarms`           | 空闲自动锁定                                      | 可选（不用则退化为 SW 内计时，会被回收打断） |
+| `host_permissions` | —                                                 | ❌ **不申请**                                |
 
 **关键设计**：用 `activeTab` 而不是 `<all_urls>` 读取当前页域名。`activeTab` 只在用户主动点击扩展图标时授予当前标签页的一次性访问权，正好匹配我们的场景（用户点开 popup 时才需要知道当前站点）。这样既不申请宽权限，也能通过 Chrome Web Store 的权限审查——**权限申请越少，商店审核越快，用户安装转化率越高**。
 
@@ -88,14 +88,14 @@ popup 打开
 
 ### 4.3 匹配规则
 
-| 规则 | 说明 |
-|---|---|
-| 精确匹配 | `github.com` 匹配 `github.com` |
-| 子域匹配 | 绑定 `github.com` 时，`gist.github.com` **也匹配**（默认开启，可在设置中关闭） |
-| 反向不匹配 | 绑定 `gist.github.com` 时，`github.com` **不匹配** |
-| 大小写 | 域名统一小写后比对 |
-| 端口 | 忽略 |
-| 协议 | 只接受 `https:` 与 `http:`，其他协议（`chrome:`、`about:`、`file:`）一律不匹配 |
+| 规则       | 说明                                                                           |
+| ---------- | ------------------------------------------------------------------------------ |
+| 精确匹配   | `github.com` 匹配 `github.com`                                                 |
+| 子域匹配   | 绑定 `github.com` 时，`gist.github.com` **也匹配**（默认开启，可在设置中关闭） |
+| 反向不匹配 | 绑定 `gist.github.com` 时，`github.com` **不匹配**                             |
+| 大小写     | 域名统一小写后比对                                                             |
+| 端口       | 忽略                                                                           |
+| 协议       | 只接受 `https:` 与 `http:`，其他协议（`chrome:`、`about:`、`file:`）一律不匹配 |
 
 子域匹配需防**后缀伪造**：判断 `hostname === site || hostname.endsWith("." + site)`，不能用裸 `endsWith(site)`，否则 `evil-github.com` 会错误匹配 `github.com`。这是一个真实的安全陷阱，必须有对应测试用例。
 
@@ -107,12 +107,12 @@ popup 打开
 
 MV3 的 service worker 在空闲约 30 秒后被回收，这是扩展设计中最容易踩坑的地方。
 
-| 数据 | 存储位置 | 生命周期 |
-|---|---|---|
-| 加密 vault blob | `chrome.storage.local` | 持久（落盘） |
-| 解锁后的 DEK | `chrome.storage.session` | 浏览器会话内，**不落盘** |
-| Argon2id 派生中间态 | SW 内存 | SW 存活期间，回收即失效（可从 DEK 恢复，无需重新派生） |
-| 主密码 | **不存储** | 仅在派生 DEK 的瞬间存在于内存 |
+| 数据                | 存储位置                 | 生命周期                                               |
+| ------------------- | ------------------------ | ------------------------------------------------------ |
+| 加密 vault blob     | `chrome.storage.local`   | 持久（落盘）                                           |
+| 解锁后的 DEK        | `chrome.storage.session` | 浏览器会话内，**不落盘**                               |
+| Argon2id 派生中间态 | SW 内存                  | SW 存活期间，回收即失效（可从 DEK 恢复，无需重新派生） |
+| 主密码              | **不存储**               | 仅在派生 DEK 的瞬间存在于内存                          |
 
 **流程**：
 
