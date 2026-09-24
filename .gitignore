@@ -1,0 +1,163 @@
+# ===========================================================================
+# 安全红线：密钥库与备份文件（AGENTS.md §5.3）
+# ===========================================================================
+# 本仓库持有 MFA 密钥格式的处理代码，任何真实 vault / 备份 / 二维码一旦提交
+# 即视为 T0 事故。以下模式无条件忽略。
+#
+# 唯一例外：显式标注的脱敏测试夹具（见文件末尾的 negation 规则）。
+# 新增夹具前必须确认其中 secret 全为假值（RFC 测试向量或 JBSWY3DPEHPK3PXP）。
+
+# 本 App 自有格式
+*.mfavault
+*.mfavault.json
+
+# 通用备份命名
+*-backup.json
+*-backup.json.enc
+*-backup.encrypted.json
+*backup*.txt
+
+# 第三方 App 导出文件
+aegis*.json
+aegis*.json.enc
+2fas-backup.json
+2fas-backup.json.enc
+ente-auth-codes.txt
+freeotp*.json
+raivio*.json
+*authenticator*.json
+
+# otpauth URI 批量导出（可能含真实 secret）
+*.otpauth
+otpauth-*.txt
+otpauth-migration-*.txt
+
+# 二维码图片可能编码真实 secret
+qr-*.png
+qr-*.svg
+qr-*.pdf
+*-qr.png
+*-qr.svg
+*-migration.png
+
+# 主密码 / 派生密钥的实验产物
+*.dek
+*.kek
+*-wrapped.key
+
+# 显式标注的脱敏夹具目录例外（仅限 transfer 包的测试样本）
+!packages/transfer/src/__fixtures__/**
+!packages/transfer/src/**/__fixtures__/**
+
+# ===========================================================================
+# 凭据与环境
+# ===========================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.keystore
+*.jks
+secrets.json
+credentials.json
+google-services.json
+GoogleService-Info.plist
+
+# ===========================================================================
+# Node / pnpm / Turborepo
+# ===========================================================================
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+dist/
+build/
+out/
+*.tsbuildinfo
+.turbo/
+coverage/
+.nyc_output/
+*.lcov
+
+# ===========================================================================
+# React Native / Expo（apps/mobile）
+# ===========================================================================
+.expo/
+.expo-shared/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/local.properties
+apps/mobile/android/app/google-services.json
+apps/mobile/ios/build/
+apps/mobile/ios/Pods/
+apps/mobile/ios/Podfile.lock
+apps/mobile/ios/*.xcworkspace/xcuserdata/
+apps/mobile/ios/*.xcodeproj/xcuserdata/
+apps/mobile/*.jks
+apps/mobile/*.keystore
+
+# Android 原生（argon2-jvm 等原生模块构建产物）
+.gradle/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# iOS 原生（libsodium 等）
+xcuserdata/
+*.xcscmblueprint
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ===========================================================================
+# Chrome 扩展（apps/extension）
+# ===========================================================================
+apps/extension/.output/
+apps/extension/.wxt/
+apps/extension/dist-zip/
+*.zip
+*.crx
+*.pem
+
+# ===========================================================================
+# Tauri（apps/desktop，后期阶段）
+# ===========================================================================
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/WixTools/
+
+# ===========================================================================
+# 编辑器与系统
+# ===========================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+*.swp
+*.swo
+*~
+
+# ===========================================================================
+# 日志与临时文件
+# ===========================================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+tmp/
+temp/
+*.tmp
