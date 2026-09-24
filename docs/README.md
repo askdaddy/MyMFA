@@ -33,7 +33,7 @@
 
 这几条最容易被忽略，违反会造成返工或安全事故：
 
-1. **`packages/*` 禁止 import 任何平台 API**。平台差异通过 Provider 注入。（[architecture.md §3](architecture.md#3-依赖方向)）
+1. **核心包禁止 import 任何平台 API**，平台差异通过 Provider 注入；唯一例外是 `packages/crypto-web`（Web 适配包，理由见 §3.1）。（[architecture.md §3](architecture.md#3-依赖方向)）
 2. **M0 未通过跨端加密一致性验证，不得开始 vault 层实现**。（[security.md §4](security.md#4-跨端实现一致性本项目最大技术风险)）
 3. **`secret` 存原始字节的 base64，不存 base32 字符串**。（[ADR-014](decisions.md#adr-014)）
 4. **Argon2id 参数只能上调不能下调**。（`AGENTS.md` §5.1）

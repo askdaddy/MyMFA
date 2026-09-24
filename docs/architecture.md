@@ -37,22 +37,42 @@ test/           QA 黑盒测试脚本
 第 3 层   domain
 第 2 层   vault            transfer
 第 1 层   crypto    otp          （叶子，无内部依赖）
+适配层    crypto-web ──→ crypto  （Web Provider，只被 apps/* 与跨端测试引用）
 ```
 
 具体到包，允许的内部依赖是一份**白名单**（`eslint.config.js` 中的 `INTERNAL_DEPS`）：
 
-| 包         | 允许依赖                 | 用途                                                            |
-| ---------- | ------------------------ | --------------------------------------------------------------- |
-| `otp`      | —                        | 叶子                                                            |
-| `crypto`   | —                        | 叶子                                                            |
-| `vault`    | `crypto`、`otp`          | 加解密；校验条目参数合法性                                      |
-| `transfer` | `vault`、`crypto`、`otp` | 构造 Entry；解密他 App 的加密备份；otpauth URI 的 base32 编解码 |
-| `domain`   | `vault`                  | 读取条目                                                        |
-| `apps/*`   | 全部 packages            | 并负责**注入平台 Provider**                                     |
+| 包           | 允许依赖                 | 用途                                                            |
+| ------------ | ------------------------ | --------------------------------------------------------------- |
+| `otp`        | —                        | 叶子                                                            |
+| `crypto`     | —                        | 叶子，只有接口与参数常量                                        |
+| `crypto-web` | `crypto`                 | Web/WebCrypto 侧的 KDF、AEAD、随机数 Provider 实现              |
+| `vault`      | `crypto`、`otp`          | 加解密；校验条目参数合法性                                      |
+| `transfer`   | `vault`、`crypto`、`otp` | 构造 Entry；解密他 App 的加密备份；otpauth URI 的 base32 编解码 |
+| `domain`     | `vault`                  | 读取条目                                                        |
+| `apps/*`     | 全部 packages            | 并负责**注入平台 Provider**                                     |
 
-任何 `packages/*` 一律禁止 import `apps/*` 与平台 SDK。
+核心包（`otp`、`crypto`、`vault`、`transfer`、`domain`）一律禁止 import `apps/*` 与任何平台 SDK。
 
-**强制方式**：ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-restricted-globals`（`window`/`chrome`/`process` 等）按 `packages/*` 逐包配置，在 CI 阻断，不靠人工审查。
+### 3.1 为什么 `crypto-web` 是例外
+
+`packages/crypto` 只有接口，那么 Web 侧的实现（`hash-wasm` 的 Argon2id + WebCrypto 的 AES-GCM）必须有个落脚处。它同时被 `apps/extension`、`apps/desktop` 与跨端一致性测试使用——若各写一份，就违背了「安全敏感代码只实现一次」（见 `README.md`），而这三处任何一处写错都会导致 vault 在另一端打不开。
+
+因此 `crypto-web` 作为**平台适配包**存在，是 `packages/*` 平台禁令的唯一例外：
+
+- 允许 `hash-wasm`（AGENTS.md §5.2 许可的唯一 WASM 用途）与 WebCrypto 全局（`crypto.subtle`、`crypto.getRandomValues`）
+- **仍然禁止** Node 内置模块与 `process` / `Buffer` / `require` / `chrome.*`，保证它能在浏览器与 MV3 service worker 里原样运行
+- 仍然禁止被任何核心包依赖，方向只能是 `apps/* → crypto-web → crypto`
+
+移动端原生 Provider（argon2-jvm、libsodium）不进 `packages/*`，直接放在 `apps/mobile` 的原生模块里——它们必然 import `react-native`，与浏览器无法共用一行代码，独立成包没有收益。
+
+`SecureStore` 的各端实现同理留在 `apps/*`：扩展端要用 `chrome.storage.session`，移动端要用 Keychain / Keystore，没有共用面。
+
+### 3.2 强制方式
+
+ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-restricted-globals`（`window`/`chrome`/`process` 等）按 `packages/*` 逐包配置，在 CI 阻断，不靠人工审查。`crypto-web` 有自己的一份规则，允许 WebCrypto 与 `hash-wasm`，其余禁令与核心包一致。
+
+发布产物另有一道类型层保障：`packages/*/tsconfig.build.json` 设 `types: []`，构建时拿不到 Node / DOM 的类型声明。
 
 未声明的第三方依赖不需要额外规则拦截：pnpm 的 `node_modules` 严格隔离，包只能解析到自己 `package.json` 里声明的依赖，漏声明会直接在构建期失败。
 
@@ -79,11 +99,15 @@ test/           QA 黑盒测试脚本
 
 各端实现位置：
 
-| 端                      | KDF 实现                              | AEAD 实现                    |
-| ----------------------- | ------------------------------------- | ---------------------------- |
-| Web / 扩展 / Tauri 前端 | `hash-wasm` 的 argon2id               | WebCrypto `crypto.subtle`    |
-| Android                 | argon2-jvm（原生模块）                | Android Keystore / Conscrypt |
-| iOS                     | libsodium `crypto_pwhash`（原生模块） | CryptoKit                    |
+| 端                      | KDF 实现                              | AEAD 实现                    | 代码位置                      |
+| ----------------------- | ------------------------------------- | ---------------------------- | ----------------------------- |
+| Web / 扩展 / Tauri 前端 | `hash-wasm` 的 argon2id               | WebCrypto `crypto.subtle`    | `packages/crypto-web`（共用） |
+| Android                 | argon2-jvm（原生模块）                | Android Keystore / Conscrypt | `apps/mobile` 原生模块        |
+| iOS                     | libsodium `crypto_pwhash`（原生模块） | CryptoKit                    | `apps/mobile` 原生模块        |
+
+Web 侧之所以独立成 `packages/crypto-web` 而不是放进各 app，见 [§3.1](#31-为什么-crypto-web-是例外)。`SecureStore` 不设共用包——三端实现毫无重叠（Keychain / Keystore / `chrome.storage.session`），各自留在 `apps/*`。
+
+`packages/crypto` 还负责定义 Argon2id 参数常量（`memoryKiB` / `iterations` / `parallelism` / `saltLength` / `keyLength`）与统一的错误类型。**参数常量只能放在这里**：三端实现各自硬编码数字，是单位混淆（MiB vs KiB）导致跨端不一致的头号来源（见 [testing.md §3](testing.md#3-跨端加密一致性测试最高优先级)）。
 
 三端实现必须通过 [跨端一致性测试](testing.md#3-跨端加密一致性测试最高优先级) 验证字节级一致。
 

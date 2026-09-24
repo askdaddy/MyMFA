@@ -38,20 +38,25 @@ git 已初始化，分支 `main`，远端 `git@github.com:askdaddy/MyMFA.git`。
 
 ```
 packages/
-  otp/        ✅ @askdaddy/otp      TOTP/HOTP 算法、base32、摘要算法抽象（零平台依赖）
-  crypto/     ⬜ @askdaddy/crypto   KDF 与 AEAD 抽象层 + 各端 Provider（零平台依赖，原语注入）
-  vault/      ⬜ @askdaddy/vault    数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
-  transfer/   ⬜ @askdaddy/transfer 导入导出格式解析器与生成器、格式探测器（零平台依赖）
-  domain/     ⬜ @askdaddy/domain   排序、搜索、tag、使用统计、域名匹配（零平台依赖）
+  otp/         ✅ @askdaddy/otp        TOTP/HOTP 算法、base32、摘要算法抽象（零平台依赖）
+  crypto/      ⬜ @askdaddy/crypto     KDF/AEAD/随机数/安全存储的接口与参数常量（零平台依赖）
+  crypto-web/  ⬜ @askdaddy/crypto-web Web Provider：hash-wasm Argon2id + WebCrypto AES-GCM
+  vault/       ⬜ @askdaddy/vault      数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
+  transfer/    ⬜ @askdaddy/transfer   导入导出格式解析器与生成器、格式探测器（零平台依赖）
+  domain/      ⬜ @askdaddy/domain     排序、搜索、tag、使用统计、域名匹配（零平台依赖）
 apps/
-  mobile/     ⬜ React Native（Expo prebuild + 自定义原生模块）
-  extension/  ⬜ Chrome MV3 扩展（WXT 脚手架）
+  mobile/     ⬜ React Native（Expo prebuild + 自定义原生模块 + 原生 Argon2id Provider）
+  extension/  ⬜ Chrome MV3 扩展（WXT 脚手架 + chrome.storage SecureStore）
   desktop/    ⬜ Tauri（后期阶段，暂不创建）
 docs/         ✅ 设计文档
 test/         ⬜ QA 黑盒测试脚本
 ```
 
-`packages/*` 一律**禁止** import 任何平台 API（`react-native`、`chrome.*`、`window`、`process`、Node 内置模块）。平台差异通过依赖注入的 Provider 接口解决。强制方式见 §4.1。
+核心包（`otp`、`crypto`、`vault`、`transfer`、`domain`）一律**禁止** import 任何平台 API（`react-native`、`chrome.*`、`window`、`process`、Node 内置模块）。平台差异通过依赖注入的 Provider 接口解决。
+
+**唯一例外是 `packages/crypto-web`**：它是 Web 侧的平台适配包，允许 `hash-wasm` 与 WebCrypto 全局，但仍禁止 Node 内置模块与 `process` / `Buffer` / `chrome.*`，且禁止被任何核心包依赖。理由与边界见 `docs/architecture.md` §3.1——扩展与桌面端共用同一份加密实现，避免安全敏感代码写两遍。
+
+新增内部包必须同步三处：`docs/architecture.md` §3 的白名单表、本文件的目录树、`eslint.config.js` 的 `INTERNAL_PACKAGES` 与 `INTERNAL_DEPS`。
 
 ## 4. 命令
 

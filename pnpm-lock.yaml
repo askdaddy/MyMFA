@@ -54,6 +54,18 @@ importers:
         specifier: 'catalog:'
         version: 8.70.1(eslint@10.11.0)(typescript@5.9.3)
 
+  packages/crypto:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.4
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.1(@types/node@22.20.4)(vite@8.3.0(@types/node@22.20.4))
+
   packages/otp:
     devDependencies:
       '@types/node':

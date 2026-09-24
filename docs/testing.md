@@ -70,15 +70,42 @@
 
 ### 3.1 三端实现
 
-| 端         | Argon2id 实现             | AEAD                 |
-| ---------- | ------------------------- | -------------------- |
-| Web / 扩展 | `hash-wasm`               | WebCrypto            |
-| Android    | argon2-jvm                | Conscrypt / Keystore |
-| iOS        | libsodium `crypto_pwhash` | CryptoKit            |
+| 端         | Argon2id 实现             | AEAD                 | 代码位置                      |
+| ---------- | ------------------------- | -------------------- | ----------------------------- |
+| Web / 扩展 | `hash-wasm`               | WebCrypto            | `packages/crypto-web`（共用） |
+| Android    | argon2-jvm                | Conscrypt / Keystore | `apps/mobile` 原生模块        |
+| iOS        | libsodium `crypto_pwhash` | CryptoKit            | `apps/mobile` 原生模块        |
 
-### 3.2 测试方法
+`version` 必须三端显式传 `0x13`（Argon2 1.3），不能依赖各库默认值。
 
-固定输入，三端输出必须**字节级完全一致**：
+### 3.2 已知答案测试（KAT）先行
+
+三端交叉比对之前，每端实现必须先独立通过 **RFC 9106 §5.3** 的 Argon2id 官方向量。这是唯一能证明「实现本身正确」的手段——只靠三端互相一致，可能是三端一起错。
+
+```
+password          = 32 字节，全部为 0x01
+salt              = 16 字节，全部为 0x02
+secret (keyed)    =  8 字节，全部为 0x03
+associated data   = 12 字节，全部为 0x04
+memoryKiB         = 32
+iterations        = 3
+parallelism       = 4
+version           = 0x13
+tagLength         = 32
+
+期望 tag =
+0d 64 0d f5 8d 78 76 6c 08 c0 37 a3 4a 8b 53 c9
+d0 1e f0 45 2d 75 b6 5e b5 25 20 e9 6b 01 e6 59
+```
+
+注意两点：
+
+- 该向量**带 `secret` 与 `associated data`**。若某端使用的库不支持这两个可选输入（需确认 `hash-wasm` 的 `secret` / `associatedData` 选项），就无法跑官方向量，必须换成参考实现（P-H-C/phc-winner-argon2 的 `argon2` CLI）生成对照值，不能跳过这一步。
+- `memoryKiB = 32` 远低于生产基线 65536，因此 `assertArgon2idParams` 只做结构性校验、不比对基线；基线降级检查在 vault 层执行（见 `packages/crypto/src/params.ts`）。
+
+### 3.3 生产参数下的三端比对
+
+KAT 通过后，再用生产参数做三端字节级比对：
 
 ```
 password    = "correct horse battery staple"
@@ -86,25 +113,28 @@ salt        = <16 字节固定值，base64 常量>
 memoryKiB   = 65536
 iterations  = 3
 parallelism = 4
+version     = 0x13
 keyLength   = 32
 ```
 
 验证步骤：
 
-1. **官方测试向量先行**：每端实现先跑 Argon2 参考实现的测试向量（含 `argon2id` 各参数组合），确保单端正确。
-2. **三端交叉比对**：把三端输出写入同一份 JSON 快照文件，CI 中比对哈希值。
+1. **KAT 先行**：每端先通过 §3.2 的 RFC 9106 向量。
+2. **三端交叉比对**：把三端在生产参数下的输出写入同一份 JSON 快照文件，CI 中比对哈希值。
 3. **真实文件往返**：用一个真实加密的 `.mfavault` 样本，三端互相解密（A 端加密 → B/C 端解密），全部必须成功。
 4. **单位陷阱专项检查**：内存参数在 KiB / MiB / 字节之间的换算是最常见的不一致来源。本项目统一以 **`memoryKiB`** 为准，各端 Provider 负责换算，换算逻辑必须有独立测试。
 
-### 3.3 常见失败模式（测试须覆盖）
+### 3.4 常见失败模式（测试须覆盖）
 
-| 失败模式                             | 症状                                 |
-| ------------------------------------ | ------------------------------------ |
-| 内存单位混淆                         | 派生出的密钥完全不同，vault 无法解密 |
-| 并行度参数被忽略                     | 输出不同                             |
-| salt 编码差异（hex vs base64）       | 输出不同                             |
-| GCM tag 拼接位置不同（前置 vs 后置） | 解密失败或 tag 校验失败              |
-| nonce 长度不一致（12 vs 16 字节）    | 解密失败                             |
+| 失败模式                             | 症状                                                     |
+| ------------------------------------ | -------------------------------------------------------- |
+| 内存单位混淆                         | 派生出的密钥完全不同，vault 无法解密                     |
+| 并行度参数被忽略                     | 输出不同                                                 |
+| Argon2 版本未显式指定（1.0 vs 1.3）  | 输出不同，且不报错                                       |
+| salt 编码差异（hex vs base64）       | 输出不同                                                 |
+| 主密码的 UTF-8 编码差异              | 输出不同（本项目用 `@askdaddy/crypto` 的纯 TS 实现规避） |
+| GCM tag 拼接位置不同（前置 vs 后置） | 解密失败或 tag 校验失败                                  |
+| nonce 长度不一致（12 vs 16 字节）    | 解密失败                                                 |
 
 ## 4. Vault 格式测试
 

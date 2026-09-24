@@ -1,7 +1,7 @@
 import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 
-const INTERNAL_PACKAGES = ['otp', 'crypto', 'vault', 'transfer', 'domain']
+const INTERNAL_PACKAGES = ['otp', 'crypto', 'crypto-web', 'vault', 'transfer', 'domain']
 const APP_PACKAGES = ['mobile', 'extension', 'desktop']
 
 /**
@@ -11,10 +11,14 @@ const APP_PACKAGES = ['mobile', 'extension', 'desktop']
 const INTERNAL_DEPS = {
   otp: [],
   crypto: [],
+  'crypto-web': ['crypto'],
   vault: ['crypto', 'otp'],
   transfer: ['vault', 'crypto', 'otp'],
   domain: ['vault'],
 }
+
+/** 平台适配包，是平台禁令的唯一例外（docs/architecture.md §3.1）。 */
+const WEB_ADAPTER_PACKAGE = 'crypto-web'
 
 const NODE_BUILTINS = [
   'assert',
@@ -75,7 +79,7 @@ const NODE_SUBPATH_PATTERNS = NODE_BUILTINS.filter((name) => !INTERNAL_PACKAGES.
   (name) => `${name}/*`,
 )
 
-const PLATFORM_PATTERNS = [
+const PLATFORM_SDK_PATTERNS = [
   {
     group: ['react-native', 'react-native-*', '@react-native-*/*', '@react-native-community/*'],
     message: 'packages/* 禁止 React Native API，改用注入的 Provider（AGENTS.md §3）',
@@ -93,11 +97,6 @@ const PLATFORM_PATTERNS = [
     message: 'packages/* 禁止 Tauri API，改用注入的 Provider（AGENTS.md §3）',
   },
   {
-    group: ['hash-wasm', 'argon2-*', 'libsodium*'],
-    message:
-      '平台相关的加密实现只能放在 apps/* 的 Provider 里；packages/crypto 只定义接口与参数常量（AGENTS.md §5.1）',
-  },
-  {
     group: ['node:*', ...NODE_SUBPATH_PATTERNS],
     message: NODE_MESSAGE,
   },
@@ -106,6 +105,16 @@ const PLATFORM_PATTERNS = [
     message: 'packages/* 禁止反向依赖 apps/*（docs/architecture.md §3）',
   },
 ]
+
+// 加密实现库单独一条，因为 packages/crypto-web 是唯一被允许使用它的地方。
+const CRYPTO_IMPL_PATTERN = {
+  group: ['hash-wasm', 'argon2-*', 'libsodium*', '@noble/*'],
+  message:
+    '加密原语的实现库只允许出现在 packages/crypto-web 或 apps/* 的原生模块里；' +
+    'packages/crypto 只定义接口与参数常量（AGENTS.md §5.1）',
+}
+
+const CORE_PACKAGE_PATTERNS = [...PLATFORM_SDK_PATTERNS, CRYPTO_IMPL_PATTERN]
 
 const PLATFORM_GLOBALS = [
   'window',
@@ -123,7 +132,12 @@ const PLATFORM_GLOBALS = [
   'self',
   'Buffer',
   'require',
+  // 核心包必须走注入的 Provider，直接摸 WebCrypto 会绕过 §5.1「加密原语只在 Provider 内调用」
+  'crypto',
 ]
+
+// crypto-web 可以用 WebCrypto 全局，其余禁令与核心包完全一致。
+const WEB_ADAPTER_GLOBALS = PLATFORM_GLOBALS.filter((name) => name !== 'crypto')
 
 function internalDepMessage(pkg, allowed) {
   if (allowed.length === 0) {
@@ -132,27 +146,33 @@ function internalDepMessage(pkg, allowed) {
   return `packages/${pkg} 只允许依赖 ${allowed.map((p) => `@askdaddy/${p}`).join('、')}（docs/architecture.md §3）`
 }
 
-const internalDepRules = Object.entries(INTERNAL_DEPS).map(([pkg, allowed]) => ({
-  files: [`packages/${pkg}/**/*.{ts,tsx,mts,cts}`],
-  rules: {
-    'no-restricted-imports': [
-      'error',
-      {
-        paths: NODE_BUILTIN_PATHS,
-        patterns: [
-          ...PLATFORM_PATTERNS,
-          {
-            group: INTERNAL_PACKAGES.filter((p) => !allowed.includes(p)).map(
-              (p) => `@askdaddy/${p}`,
-            ),
-            message: internalDepMessage(pkg, allowed),
-          },
-        ],
-      },
-    ],
-    'no-restricted-globals': ['error', ...PLATFORM_GLOBALS],
-  },
-}))
+const internalDepRules = Object.entries(INTERNAL_DEPS).map(([pkg, allowed]) => {
+  const isWebAdapter = pkg === WEB_ADAPTER_PACKAGE
+  return {
+    files: [`packages/${pkg}/**/*.{ts,tsx,mts,cts}`],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: NODE_BUILTIN_PATHS,
+          patterns: [
+            ...(isWebAdapter ? PLATFORM_SDK_PATTERNS : CORE_PACKAGE_PATTERNS),
+            {
+              group: INTERNAL_PACKAGES.filter((p) => !allowed.includes(p)).map(
+                (p) => `@askdaddy/${p}`,
+              ),
+              message: internalDepMessage(pkg, allowed),
+            },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        ...(isWebAdapter ? WEB_ADAPTER_GLOBALS : PLATFORM_GLOBALS),
+      ],
+    },
+  }
+})
 
 export default tseslint.config(
   {
