@@ -15,48 +15,82 @@
 
 ## 2. 当前仓库状态
 
-**绿地仓库（greenfield）**：目前只有文档，没有代码、没有依赖、没有构建配置。
-`docs/` 是唯一的设计基线，实现必须与之一致；若实现中发现设计有误，先改文档再改代码。
+git 已初始化，分支 `main`，远端 `git@github.com:askdaddy/MyMFA.git`。
+**仓库可见性（public / private）与开源许可证尚未确定，未经用户显式确认不得 `git push`。**
 
-16 条 ADR 已全部确认，无阻塞性待决策项（见 `docs/decisions.md`）。下一步是 M0：monorepo 搭建 + `packages/otp` + `packages/crypto` + 三端 Argon2id 一致性验证。
+工具链已安装：pnpm workspaces + Turborepo + TypeScript strict + ESLint + Prettier + Vitest。
+依赖版本统一由 `pnpm-workspace.yaml` 的 `catalog:` 管理，各包一律写 `"catalog:"`，不要写死版本号。
+
+进度：
+
+- ✅ `docs/` 设计基线（16 条 ADR 全部确认，无阻塞性待决策项，见 `docs/decisions.md`）
+- ✅ monorepo 脚手架与平台禁令强制机制
+- ✅ `packages/otp`：base32 / HOTP / TOTP / 预提示 / 时钟偏移，通过 RFC 4226 附录 D 与 RFC 6238 附录 B 全部官方测试向量
+- ⬜ `packages/crypto`、三端 Argon2id 一致性验证、`vault` / `transfer` / `domain`、全部 apps
+
+`docs/` 是唯一的设计基线，实现必须与之一致；若实现中发现设计有误，先改文档再改代码。
 
 **M0 出口标准未达成前，禁止开始 vault 层实现**（见 `docs/security.md` §4）。
 
-## 3. 目标目录结构
+## 3. 目录结构
 
-以下为规划中的结构，尚未创建。新增代码必须落在对应位置，不要在根目录散放文件。
+标注 ✅ 的已存在，⬜ 为规划中。新增代码必须落在对应位置，不要在根目录散放文件。
 
 ```
 packages/
-  otp/        @askdaddy/otp      TOTP/HOTP 算法、base32、摘要算法抽象（零平台依赖）
-  crypto/     @askdaddy/crypto   KDF 与 AEAD 抽象层 + 各端 Provider（零平台依赖，原语注入）
-  vault/      @askdaddy/vault    数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
-  transfer/   @askdaddy/transfer 导入导出格式解析器与生成器、格式探测器（零平台依赖）
-  domain/     @askdaddy/domain   排序、搜索、tag、使用统计、域名匹配（零平台依赖）
+  otp/        ✅ @askdaddy/otp      TOTP/HOTP 算法、base32、摘要算法抽象（零平台依赖）
+  crypto/     ⬜ @askdaddy/crypto   KDF 与 AEAD 抽象层 + 各端 Provider（零平台依赖，原语注入）
+  vault/      ⬜ @askdaddy/vault    数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
+  transfer/   ⬜ @askdaddy/transfer 导入导出格式解析器与生成器、格式探测器（零平台依赖）
+  domain/     ⬜ @askdaddy/domain   排序、搜索、tag、使用统计、域名匹配（零平台依赖）
 apps/
-  mobile/     React Native（Expo prebuild + 自定义原生模块）
-  extension/  Chrome MV3 扩展（WXT 脚手架）
-  desktop/    Tauri（后期阶段，暂不创建）
-docs/         设计文档（本目录）
-test/         QA 黑盒测试脚本
+  mobile/     ⬜ React Native（Expo prebuild + 自定义原生模块）
+  extension/  ⬜ Chrome MV3 扩展（WXT 脚手架）
+  desktop/    ⬜ Tauri（后期阶段，暂不创建）
+docs/         ✅ 设计文档
+test/         ⬜ QA 黑盒测试脚本
 ```
 
-`packages/*` 一律**禁止** import 任何平台 API（`react-native`、`chrome.*`、`window`、`process`、Node 内置模块）。平台差异通过依赖注入的 Provider 接口解决。
+`packages/*` 一律**禁止** import 任何平台 API（`react-native`、`chrome.*`、`window`、`process`、Node 内置模块）。平台差异通过依赖注入的 Provider 接口解决。强制方式见 §4.1。
 
-## 4. 命令（规划中）
+## 4. 命令
 
-pnpm workspaces + Turborepo。当前尚未安装依赖，以下命令为约定的目标接口，落地时需保持一致：
+已落地：
 
-| 命令 | 作用 |
-|---|---|
-| `pnpm install` | 安装依赖 |
-| `pnpm build` | 构建全部 package 与 app |
-| `pnpm typecheck` | 全仓 TypeScript 严格类型检查 |
-| `pnpm lint` | ESLint + Prettier 检查 |
-| `pnpm test` | Vitest 单元测试（含 RFC 测试向量与 golden test） |
-| `pnpm test:cross` | **跨端加密一致性测试**（Argon2id/AES-GCM 字节级比对） |
-| `pnpm mobile:start` | 启动 RN 开发服务 |
-| `pnpm ext:dev` | 启动扩展开发构建（watch） |
+| 命令                           | 作用                                        |
+| ------------------------------ | ------------------------------------------- |
+| `pnpm install`                 | 安装依赖                                    |
+| `pnpm build`                   | 构建全部 package（`tsc` → `dist`）          |
+| `pnpm typecheck`               | 全仓 TypeScript 严格类型检查                |
+| `pnpm lint`                    | 根级 `eslint .`，含平台禁令与依赖方向白名单 |
+| `pnpm format` / `format:check` | Prettier 写入 / 校验                        |
+| `pnpm test`                    | Vitest 单元测试（含 RFC 官方测试向量）      |
+
+规划中，尚未实现：
+
+| 命令                | 作用                                                  |
+| ------------------- | ----------------------------------------------------- |
+| `pnpm test:cross`   | **跨端加密一致性测试**（Argon2id/AES-GCM 字节级比对） |
+| `pnpm mobile:start` | 启动 RN 开发服务                                      |
+| `pnpm ext:dev`      | 启动扩展开发构建（watch）                             |
+
+`pnpm lint` 只在根级运行：ESLint flat config 集中在 `eslint.config.js`，规则按路径分域，分包运行反而会漏掉跨包规则。
+
+### 4.1 平台禁令的强制方式
+
+`packages/*` 的平台无关性不靠人工审查，由两道机制保证：
+
+1. **ESLint**（`eslint.config.js`）：`no-restricted-imports` 拦截平台 SDK、Node 内置模块与白名单外的内部包；`no-restricted-globals` 拦截 `window` / `chrome` / `process` / `Buffer` 等；`packages/*` 内 `no-console` 为 error（§5.1）。内部包依赖是**白名单** `INTERNAL_DEPS`，新增包必须同步这张表与 `docs/architecture.md` §3。
+2. **TypeScript**：`packages/*/tsconfig.build.json` 设 `types: []`，发布产物在类型层面就拿不到 Node / DOM 全局。
+
+因此每个 `packages/*` 有两份 tsconfig，新包照抄这个结构：
+
+- `tsconfig.json` — 含 `types: ["node"]`，覆盖 `src` 与测试，供 typecheck 与编辑器使用
+- `tsconfig.build.json` — `types: []`、只含 `src`、排除测试、输出到 `dist`
+
+`moduleResolution` 为 `NodeNext`，**相对导入必须显式写 `.js` 扩展名**（`import { x } from './x.js'`）。
+
+测试文件（`*.test.ts`、`__tests__/**`）豁免平台禁令，因为夹具需要一个真实的 HMAC / 随机数实现充当被测代码的对照；测试不进入发布产物。
 
 ## 5. 安全红线（不可协商）
 
@@ -108,15 +142,15 @@ pnpm workspaces + Turborepo。当前尚未安装依赖，以下命令为约定�
 
 ## 8. 文档索引
 
-| 文档 | 内容 |
-|---|---|
-| `docs/README.md` | 文档导航 |
-| `docs/decisions.md` | ADR：全部已确认决策与待确认默认值 |
-| `docs/architecture.md` | monorepo 结构、包职责、依赖方向 |
-| `docs/security.md` | 双层密钥模型、KDF/AEAD、生物识别、跨端一致性 |
-| `docs/vault-format.md` | vault 文件格式与数据模型 schema |
-| `docs/features.md` | 预提示、排序、搜索、tag、图标、时钟校准 |
-| `docs/transfer.md` | 导入导出格式矩阵与探测策略 |
-| `docs/chrome-extension.md` | MV3 架构、权限最小化、域名绑定 |
-| `docs/testing.md` | 测试策略、测试向量来源、golden test |
-| `docs/roadmap.md` | M0–M6 里程碑与风险清单 |
+| 文档                       | 内容                                         |
+| -------------------------- | -------------------------------------------- |
+| `docs/README.md`           | 文档导航                                     |
+| `docs/decisions.md`        | ADR：全部已确认决策与待确认默认值            |
+| `docs/architecture.md`     | monorepo 结构、包职责、依赖方向              |
+| `docs/security.md`         | 双层密钥模型、KDF/AEAD、生物识别、跨端一致性 |
+| `docs/vault-format.md`     | vault 文件格式与数据模型 schema              |
+| `docs/features.md`         | 预提示、排序、搜索、tag、图标、时钟校准      |
+| `docs/transfer.md`         | 导入导出格式矩阵与探测策略                   |
+| `docs/chrome-extension.md` | MV3 架构、权限最小化、域名绑定               |
+| `docs/testing.md`          | 测试策略、测试向量来源、golden test          |
+| `docs/roadmap.md`          | M0–M6 里程碑与风险清单                       |

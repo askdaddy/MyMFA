@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // types:[] 让发布产物在**类型层面**也无法访问 Node/DOM 全局，
+    // 与 ESLint 的 no-restricted-globals 一起构成 packages/* 平台禁令的双重保障。
+    "types": [],
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
+}
