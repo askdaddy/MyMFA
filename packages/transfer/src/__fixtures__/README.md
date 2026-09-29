@@ -1,5 +1,24 @@
 # golden 夹具来源标注
 
+## #10 加密夹具（非真实用户备份）
+
+`aegis_encrypted.json`、`twofas_encrypted_v2.2fas`、`twofas_encrypted_v3.2fas`、
+`twofas_encrypted.2fas` 逐字节取自下方 Aegis commit 的 `importers/` 测试资源。
+其中后者上游文件名为 `2fas_authenticator_encrypted_v4.2fas`；v2 上游文件名无版本后缀。
+上游 `DatabaseImporterTest.java` 明确使用假密码 `test`，secret 与已有明文测试资源同源。
+
+`aegis_encrypted_edge.json` / `aegis_encrypted_malformed.json`、
+`twofas_encrypted_edge.2fas` / `twofas_encrypted_malformed.2fas`
+是按上述一手 schema 定义构造，非真实 App 导出，假密码 `test-测试`，种子来自既有
+`aegis_grouped_v3.json` / `twofas_edge.json`；独立 Node crypto 生成密文。
+Aegis 边界覆盖非密码槽、错误密码槽、正确密码槽与分组，畸形覆盖超限 N；
+2FAS 边界覆盖独立 salt、明文分组、部分失败、伪造 iterations 字段，畸形覆盖多余载体段。
+固定 salt / nonce 仅用于可复现的假值夹具，生产生成器使用注入的密码学随机源。
+
+2FAS 固定加密参数依据 `twofas/2fas-android` @ `0a6b4a87d4eafc38aabc9721be59bd06e88c7e54`
+的 `core/cipher/.../backup/internal/BackupKeyGeneratorPbkdf.kt`、`backup/DataEncrypted.kt`
+与 `internal/CipherAes.kt`；Aegis 密码槽依据同 commit 来源表中的 `docs/vault.md`。
+
 本目录下的夹具分两类。**非真实 App 导出**——全部 secret 均为上游仓库自带的假密钥或 RFC 测试向量，
 符合 `AGENTS.md` §5.3「测试夹具中的 secret 必须使用假值」。
 

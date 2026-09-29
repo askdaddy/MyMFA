@@ -137,7 +137,6 @@ function parseEntry(
   const account = requiredText(raw.name, `${prefix}.name`)
   const issuer = optionalText(raw.issuer, `${prefix}.issuer`)
   const note = optionalText(raw.note, `${prefix}.note`)
-  const secret = decodeBase32Secret(info.secret)
 
   const normalized = normalizeAlgorithm(info.algo)
   if (normalized.fromMd5) {
@@ -165,7 +164,6 @@ function parseEntry(
   const base = {
     issuer,
     account,
-    secret,
     algo: normalized.algo,
     digits,
     note,
@@ -180,12 +178,22 @@ function parseEntry(
     if (info.period === undefined || info.period === null) {
       throw new TransferValueError('totp 条目缺少 period')
     }
-    return { ...base, kind, period: normalizePeriod(info.period) }
+    return {
+      ...base,
+      kind,
+      period: normalizePeriod(info.period),
+      secret: decodeBase32Secret(info.secret),
+    }
   }
   if (info.counter === undefined || info.counter === null) {
     throw new TransferValueError('hotp 条目缺少 counter')
   }
-  return { ...base, kind, counter: normalizeCounter(info.counter) }
+  return {
+    ...base,
+    kind,
+    counter: normalizeCounter(info.counter),
+    secret: decodeBase32Secret(info.secret),
+  }
 }
 
 export function parseAegis(input: DetectableInput, what = 'Aegis 备份'): ImportResult {
@@ -266,7 +274,13 @@ function toAegisEntry(entry: Entry, uuidsOfTag: ReadonlySet<string>) {
   // （`guard.ts:112` 只查「字符串数组」），既然它在闸门处合法，导出就不该为它整体失败。
   const groups = entry.tagIds.filter((id) => uuidsOfTag.has(id))
 
-  const secret = encodeBase32Secret(decodeBase64Secret(entry.secret))
+  const bytes = decodeBase64Secret(entry.secret)
+  let secret: string
+  try {
+    secret = encodeBase32Secret(bytes)
+  } finally {
+    bytes.fill(0)
+  }
   // `assertVaultData` 已保证 totp 必带 period、hotp 必带 counter（`guard.ts:103-110`），故这两处
   // 非空断言恒真。必须显式取出来而不是直接展开 `entry`：`JSON.stringify` 会静默丢掉值为
   // `undefined` 的键，那会产出一个「能被 Aegis 打开、但周期是默认值」的错码文件。

@@ -1,4 +1,5 @@
 export { webAeadProvider } from './aead.js'
 export { webCompressProvider } from './compress.js'
 export { webKdfProvider } from './kdf.js'
+export { webScryptProvider, webPbkdf2Provider } from './compat-kdf.js'
 export { webRandomProvider } from './random.js'

@@ -27,6 +27,8 @@ catalog:
   # 仅作测试对照实现，绑定 P-H-C/phc-winner-argon2 官方参考实现，禁止进入生产依赖
   # （docs/testing.md §3.2「Web 端的等价论证链」）。
   argon2: 0.45.1
+  fractional-indexing: 4.0.0
+  pinyin-pro: 3.29.4
 
 # 由 pnpm 自动写入：全局配置启用了 minimumReleaseAge（新发布包需冷却期，供应链防护），
 # prettier 3.9.9 发布时间过近被显式豁免。升级 prettier 后可删除此项让 pnpm 重新评估。

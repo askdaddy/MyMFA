@@ -377,7 +377,7 @@ DEK           → 加密 vault 明文
 
 ## ADR-018
 
-**第三方加密备份的兼容 KDF 豁免（scrypt / PBKDF2）** ｜ 状态：✅ 已确认（2026-09-28，用户显式授权）
+**第三方加密备份的兼容 KDF 豁免（scrypt / PBKDF2）** ｜ 状态：✅ 已确认（2026-09-28；2026-09-29 按一手格式校准，用户显式批准）
 
 **背景**：[ADR-007](#adr-007) 与 [transfer.md §5](transfer.md#5-加密备份的密钥输入) 要求 `packages/crypto` 同时提供 Argon2id / scrypt / PBKDF2 三种 KDF，以兼容 Aegis 加密备份（scrypt）与 2FAS / Raivio 加密备份（PBKDF2）。落地 `packages/transfer`（GitHub Issue #4）时发现这与 `AGENTS.md` 的两条安全红线**按字面直接冲突**：
 
@@ -390,16 +390,16 @@ DEK           → 加密 vault 明文
 
 1. **自有 vault 的加密算法白名单不变**：仍然只有 Argon2id（KDF）+ AES-256-GCM（AEAD）。§5.1 的立法意图是锁死自有格式，这一点**不放宽**。
 2. **新增一条边界明确的豁免**：scrypt 与 PBKDF2 **仅允许**出现在「读取或写出**第三方**加密备份格式」的兼容路径上，且必须满足全部四个条件：
-   - KDF 参数（`N` / `r` / `p` / `iterations` / `salt` / `keyLength`）**一律取自备份文件自身头部**，禁止使用本 App 默认值（§5.1「禁止下调 Argon2id 参数」的基线检查不适用于此路径——那是别人的文件，参数不由我们定）
+   - 文件携带的 KDF 参数（如 `N` / `r` / `p` / `salt`）**严格取自备份文件**；未携带的参数只允许采用受支持格式版本的一手规范常量（如 2FAS 的 SHA-256 / 10000 次 / 32 字节），禁止猜值、失败后降级或套用自有 vault 默认值；第三方加密导出由调用方显式提供合法参数并写入生成文件（§5.1「禁止下调 Argon2id 参数」的基线检查不适用于此路径——那是别人的文件，参数不由我们定）
    - 派生出的密钥**只用于解开该第三方容器**，禁止参与自有 vault 的任何密钥派生、包裹或认证
    - 兼容路径**禁止**被自有 vault 的读写路径调用（`packages/vault` 不得依赖它）
-   - 仍然禁止自研：scrypt 与 PBKDF2 的实现必须来自既有依赖，不得手写
+   - 仍然禁止自研：scrypt 与 PBKDF2 的实现必须来自既有依赖或平台原生能力，不得手写
 3. **§5.2 的 WASM 限制改述为「仅限 `hash-wasm` 一处」**，而非「仅限 Argon2id 一处」。
 
 **理由**：
 
 - 冲突是**措辞层面**的，不是技术层面的。已装依赖 `hash-wasm@4.12.0` 本身就同时导出 `scrypt`（入参 `password / salt / costFactor / blockSize / parallelism / hashLength`）与 `pbkdf2`（入参 `password / salt / iterations / hashLength / hashFunction`），因此本豁免**不新增任何依赖**，也**不引入第二处 WASM**——§5.2 限制 WASM 的立法意图（收敛审计面）实际上从未被突破，被突破的只是「那一个模块里只准用一个算法」这层字面表述。
-- scrypt 的参数模型与 Aegis 备份头部的 `N / r / p` 一一对应，PBKDF2 的 `iterations` 与 2FAS / Raivio 头部一一对应，因此「参数取自文件头」这一条可直接满足，不需要任何猜测或降级。
+- scrypt 的参数模型与 Aegis 密码槽的 `N / r / p` 一一对应；2FAS 的迭代次数、摘要与输出长度固定在官方源码，文件只有 salt / iv / 密文。2026-09-29 的一手核查纠正了原先“全部参数均在头部”的假设；固定格式常量不是自有 vault 默认值。
 - 不豁免的替代方案是砍掉全部第三方加密备份兼容，代价是用户从 Aegis 迁移时**必须先自行导出明文备份**——而 Aegis 的明文导出本身带风险提示，等于把风险转嫁给用户，与「方便用户从别的 app 迁移数据」的原始需求相悖。
 
 **放弃的选项**：
@@ -412,9 +412,9 @@ DEK           → 加密 vault 明文
 
 **后果**：
 
-- ➕ ADR-007 的导出矩阵完整保留，用户可从 Aegis / 2FAS / Raivio 的加密备份直接迁入
+- ➕ Aegis / 2FAS 加密兼容在 #10 落地。Raivo（旧文档误写 Raivio）官方导出为加密 ZIP，不属于 AES-GCM 布局；AES-CTR/HMAC 与 ZIP 依赖须在独立跟进 Issue 中另立 ADR，不由本豁免顺带放行
 - ➕ 无新依赖、无第二处 WASM，`AGENTS.md` §5.2 的审计面收敛目标不变
-- ➖ `packages/crypto` 的 `KdfProvider` 契约必须扩展：`name` 当前被钉成字面量 `'argon2id'`（`packages/crypto/src/providers.ts:8`），容纳第二种 KDF 需要改这个接口，而它已被 `packages/vault` 的实现与 177 个测试依赖 → **跨包契约变更**，须在 Issue #4c 中先改文档再改代码
+- ➖ `packages/crypto` 新增独立 `ScryptProvider` / `Pbkdf2Provider` 与参数契约；现有 `KdfProvider` 保持 Argon2id-only，自有 vault 无需放宽类型。兼容接口不得赋给 vault 的 KDF
 - ➖ scrypt 在 Web 端仍需 WASM（WebCrypto 不提供 scrypt），移动端 M3 需另找原生实现（Android `org.bouncycastle` / iOS `CommonCrypto` 均无 scrypt，大概率走 libsodium 的 `crypto_pwhash_scryptsalsa208sha256`）→ 新增一条跨端一致性风险，须纳入 M3 前的验证清单
 - 🔧 `AGENTS.md` §5.1 / §5.2 的措辞修订由**开发**在 Issue #4c 的 plan 覆盖下执行（PM 可写区域仅 `docs/`，无权改根级 `AGENTS.md`）；修订授权来自用户于 2026-09-28 的显式确认
 - 🔧 [transfer.md §5](transfer.md#5-加密备份的密钥输入) 与 [security.md §3](security.md#3-加密算法与参数) 已同步补上豁免边界

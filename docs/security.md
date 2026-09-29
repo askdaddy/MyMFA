@@ -86,7 +86,7 @@ Android 侧需处理 `KeyPermanentlyInvalidatedException`（用户新增/删除�
 
 **为什么是 Argon2id 而非 scrypt**：Aegis 使用 scrypt。本项目选 Argon2id 是因为它在 Web 端有成熟的 WASM 实现（`hash-wasm`），能与移动端原生实现保持同一算法，减少"两套 KDF"的审计面。代价是导入 Aegis 加密备份时仍需单独实现 scrypt 解密——但那是**兼容路径**，不影响自有 vault 的安全模型。详见 [ADR-009](decisions.md#adr-009)。
 
-scrypt 与 PBKDF2 触碰 `AGENTS.md` §5.1 / §5.2 的字面禁令，其豁免由 [ADR-018](decisions.md#adr-018) 规定，边界是硬性的：**自有 vault 的算法白名单不变**（仍只有 Argon2id + AES-256-GCM），scrypt / PBKDF2 只能出现在读写第三方加密备份的路径上，参数一律取自该文件头部，派生密钥禁止参与自有 vault 的任何密钥派生或认证，且 `packages/vault` 不得依赖该路径。
+scrypt 与 PBKDF2 触碰 `AGENTS.md` §5.1 / §5.2 的字面禁令，其豁免由 [ADR-018](decisions.md#adr-018) 规定，边界是硬性的：**自有 vault 的算法白名单不变**（仍只有 Argon2id + AES-256-GCM），scrypt / PBKDF2 只能出现在读写第三方加密备份的路径上，文件携带参数严格读取文件，未携带参数只采用一手格式定义常量，禁止套用自有 vault 默认参数或降级猜测，派生密钥禁止参与自有 vault 的任何密钥派生或认证，且 `packages/vault` 不得依赖该路径。
 
 ### 3.1 压缩侧信道（CRIME / BREACH 类）的评估结论
 

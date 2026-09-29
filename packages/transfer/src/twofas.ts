@@ -204,7 +204,6 @@ function parseEntry(
   const kind = normalizeKind(otp.tokenType)
 
   // 顶层 `secret`，不是 `otp.secret`（本模块 JSDoc 陷阱 1）。
-  const secret = decodeBase32Secret(raw.secret)
 
   // `ServiceMapper.kt:135` 的 `otp.account ?: otp.label` 与 `:138` 的 `otp.issuer`。
   // issuer 再退一级到顶层 `name`：`ParsedEntry` 只有一个服务商槽位，而手工添加的服务
@@ -238,7 +237,6 @@ function parseEntry(
   const base = {
     issuer,
     account,
-    secret,
     algo: normalized.algo,
     digits,
     // 2FAS 的 `BackupService` 没有备注字段，也没有收藏概念（无 favorite / usageCount 键）。
@@ -253,12 +251,22 @@ function parseEntry(
     if (otp.period === undefined || otp.period === null) {
       throw new TransferValueError('totp 条目缺少 period')
     }
-    return { ...base, kind, period: normalizePeriod(otp.period) }
+    return {
+      ...base,
+      kind,
+      period: normalizePeriod(otp.period),
+      secret: decodeBase32Secret(raw.secret),
+    }
   }
   if (otp.counter === undefined || otp.counter === null) {
     throw new TransferValueError('hotp 条目缺少 counter')
   }
-  return { ...base, kind, counter: normalizeCounter(otp.counter) }
+  return {
+    ...base,
+    kind,
+    counter: normalizeCounter(otp.counter),
+    secret: decodeBase32Secret(raw.secret),
+  }
 }
 
 export function parseTwoFas(input: DetectableInput, what = '2FAS 备份'): ImportResult {

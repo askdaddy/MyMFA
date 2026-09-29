@@ -1,4 +1,17 @@
-export { TransferError, TransferFormatError, TransferValueError } from './errors.js'
+export {
+  TransferError,
+  TransferFormatError,
+  TransferValueError,
+  TransferAuthError,
+} from './errors.js'
+export {
+  parseAegisEncrypted,
+  generateAegisEncrypted,
+  parseTwoFasEncrypted,
+  type AegisImportProviders,
+  type AegisExportProviders,
+  type TwoFasImportProviders,
+} from './encrypted.js'
 export { generateAegis, parseAegis } from './aegis.js'
 export { parseBitwarden } from './bitwarden.js'
 export { openPlaintext, sealPlaintext } from './container.js'

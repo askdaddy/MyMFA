@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "test:cross": "vitest run src/__tests__/consistency.test.ts",
+    "test:cross": "vitest run src/__tests__/consistency.test.ts src/__tests__/compat-consistency.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

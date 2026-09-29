@@ -92,7 +92,7 @@ ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-res
 
 只定义接口与参数常量，不含平台实现：
 
-- `KdfProvider`：`deriveKey(password, salt, params) → Uint8Array`。`name` 当前被钉成字面量 `'argon2id'`；容纳 [ADR-018](decisions.md#adr-018) 豁免的 scrypt / PBKDF2 需要扩展这个接口，属跨包契约变更，须先改文档再改代码
+- `KdfProvider`：`deriveKey(password, salt, params) → Uint8Array`。保持 Argon2id-only，供自有 vault 使用；[ADR-018](decisions.md#adr-018) 的兼容算法使用独立 `ScryptProvider` / `Pbkdf2Provider`，不能赋给 vault 的 KDF
 - `AeadProvider`：`encrypt(key, plaintext, aad?) → {nonce, ciphertext, tag}` / `decrypt(...)`
 - `RandomProvider`：密码学安全随机数
 - `SecureStore`：平台安全存储（Keychain / Keystore / `chrome.storage.session`）
@@ -130,7 +130,7 @@ Web 侧之所以独立成 `packages/crypto-web` 而不是放进各 app，见 [§
 - 格式探测器：JSON 按特征字段判别，文本按 `otpauth://` / `otpauth-migration://` 前缀判别
 - 解析失败必须给出**行级/条目级**错误，支持"部分成功导入"而非全量回滚
 - **明文容器**（`encrypted: false`）的封装与解封归本包，`packages/vault` 只处理加密容器并显式拒绝明文（[vault-format.md §1.2](vault-format.md#12-未加密容器)）
-- 第三方**加密**备份的兼容路径（Aegis scrypt、2FAS / Raivio PBKDF2）走 [ADR-018](decisions.md#adr-018) 的豁免，四个边界条件必须全部满足；`packages/vault` 不得依赖该路径
+- 第三方**加密**备份的兼容路径（Aegis scrypt、2FAS PBKDF2；Raivo ZIP 独立跟进）走 [ADR-018](decisions.md#adr-018) 的豁免，四个边界条件必须全部满足；`packages/vault` 不得依赖该路径
 - 详细矩阵见 [transfer.md](transfer.md)
 
 ### 4.5 `packages/domain`

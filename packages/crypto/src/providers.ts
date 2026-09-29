@@ -1,4 +1,15 @@
 import type { Argon2idParams } from './params.js'
+import type { Pbkdf2Params, ScryptParams } from './compat-params.js'
+
+export interface ScryptProvider {
+  readonly name: 'scrypt'
+  deriveKey(password: Uint8Array, salt: Uint8Array, params: ScryptParams): Promise<Uint8Array>
+}
+
+export interface Pbkdf2Provider {
+  readonly name: 'pbkdf2'
+  deriveKey(password: Uint8Array, salt: Uint8Array, params: Pbkdf2Params): Promise<Uint8Array>
+}
 
 export interface KdfProvider {
   /**

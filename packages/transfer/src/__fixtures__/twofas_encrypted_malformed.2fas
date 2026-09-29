@@ -1,0 +1,26 @@
+{
+  "services": [],
+  "groups": [
+    {
+      "id": "g-work",
+      "name": "工作",
+      "isExpanded": true,
+      "updatedAt": 1702934567518
+    },
+    {
+      "id": "g-personal",
+      "name": "个人",
+      "isExpanded": false,
+      "updatedAt": 1702934567518
+    }
+  ],
+  "updatedAt": 1702934732299,
+  "schemaVersion": 4,
+  "appVersionCode": 5000009,
+  "appVersionName": "5.1.0",
+  "appOrigin": "android",
+  "account": null,
+  "servicesEncrypted": "invalid:bad:three:extra",
+  "reference": "6Mnai4XaLa9wp4VWTaXgQSJsTW0T7oyX3PLnW71XUoVIAZ/dlOjENzKLkzUe4GWzdwE7JSRfM9Pfj+bQab60V8+QwKN9nO7Ws3ptFys7vCk7oRUzBdRp3A9ci6pVX+KK8wq/xtcfoLeyNDecbQDUYWgL/+4Sy47Luy+K8M2Y/kUlwAT8I3XsKDU+7wz8yBdcFDO8vgBLIN4NrTn5cQQboHkmSMb8dyOZo7ta0cFyOmJYKYH/RbC9h6Sa9kXfOgK8Ns59oT8D40Y7JLCsoBQ00p0R8KesbuWdzoq6nDSnwDbGqQH8AKKg9Dhj/cGCHvpCmABbtQEg2lqLi62FeszJnnFgxFyz90E1y2oPJUo1VM4=:BAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=:BQAAAAAAAAAAAAAA",
+  "iterations": 1
+}

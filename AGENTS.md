@@ -57,7 +57,7 @@ packages/
   crypto-web/  ✅ @askdaddy/crypto-web Web Provider：hash-wasm Argon2id + WebCrypto AES-GCM
   vault/       ✅ @askdaddy/vault      数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
   transfer/    ⬜ @askdaddy/transfer   导入导出格式解析器与生成器、格式探测器（零平台依赖）
-  domain/      ⬜ @askdaddy/domain     排序、搜索、tag、使用统计、域名匹配（零平台依赖）
+  domain/      ✅ @askdaddy/domain     排序、搜索、tag、使用统计、域名匹配（零平台依赖）
 apps/
   mobile/     ⬜ React Native（Expo prebuild + 自定义原生模块 + 原生 Argon2id Provider）
   extension/  ⬜ Chrome MV3 扩展（WXT 脚手架 + chrome.storage SecureStore）
@@ -120,14 +120,14 @@ test/         ⬜ QA 黑盒测试脚本
 - **禁止**将主密码、DEK、KEK、条目 `secret` 明文写入日志、`console.*`、错误消息、崩溃上报、URL 参数或注释。
 - **禁止**在 `packages/crypto` 的 Provider 之外的任何位置直接调用加密原语。所有加解密必须走统一接口，便于审计。
 - **禁止**下调 Argon2id 参数（`m=64MiB, t=3, p=4`）。只能上调，且必须通过 ADR 记录（见 `docs/decisions.md`）。
-- **禁止**自研加密算法、自研 KDF、自研 AEAD。只允许使用 Argon2id + AES-256-GCM，实现库见 `docs/security.md`。
+- **禁止**自研加密算法、自研 KDF、自研 AEAD。自有 vault 只允许使用 Argon2id + AES-256-GCM。按 ADR-018，scrypt / PBKDF2 仅用于第三方加密备份兼容：文件携带参数严格读取，未携带参数只采用受支持版本的一手格式常量；第三方导出显式提供参数并写入文件；禁止套用自有 vault 默认值或降级猜测。派生密钥不得参与自有 vault 的任何派生、包裹或认证，`packages/vault` 不得依赖兼容路径，实现只能来自既有依赖或平台原生能力。实现库见 `docs/security.md`。
 - 生物识别包裹的 DEK **只能**存于设备安全存储（iOS Keychain / Android Keystore），**禁止**写入 vault 文件或任何可导出内容。
 
 ### 5.2 依赖
 
 - **禁止**引入新的加密相关依赖而不先在 Issue/ADR 中说明理由与许可证。
 - 导入解析器（protobuf、各 App 的 JSON/CSV）**禁止**使用 `eval`、`new Function`、动态 `require`。解析不可信输入必须是纯数据处理。
-- 优先使用平台原生能力（WebCrypto、`crypto.subtle`），不轻易引入 WASM；必需的 WASM 仅限 Argon2id 一处。
+- 优先使用平台原生能力（WebCrypto、`crypto.subtle`），不轻易引入 WASM；必需的 WASM 仅限 `hash-wasm` 一处，兼容 KDF 用途须满足 ADR-018 的全部边界。
 
 ### 5.3 测试与提交
 

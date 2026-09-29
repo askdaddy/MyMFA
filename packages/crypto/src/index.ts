@@ -1,5 +1,12 @@
 export { base64Decode, base64Encode, utf8Decode, utf8Encode } from './encoding.js'
 export {
+  COMPAT_KDF_LIMITS,
+  assertScryptParams,
+  assertPbkdf2Params,
+  type ScryptParams,
+  type Pbkdf2Params,
+} from './compat-params.js'
+export {
   AeadAuthError,
   Base64DecodeError,
   CompressError,
@@ -20,6 +27,8 @@ export type {
   CompressProvider,
   CryptoProviders,
   KdfProvider,
+  ScryptProvider,
+  Pbkdf2Provider,
   RandomProvider,
   SecureStore,
 } from './providers.js'

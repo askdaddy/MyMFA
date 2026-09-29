@@ -2,6 +2,13 @@ export class TransferError extends Error {
   override name = 'TransferError'
 }
 
+export class TransferAuthError extends TransferError {
+  override name = 'TransferAuthError'
+  constructor() {
+    super('无法打开加密备份：密码不正确或文件已损坏')
+  }
+}
+
 /**
  * **整包不可用**：长度超限、JSON 解析失败、格式特征缺失、版本过高。
  *

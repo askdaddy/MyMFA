@@ -18,9 +18,15 @@ catalogs:
     eslint:
       specifier: 10.11.0
       version: 10.11.0
+    fractional-indexing:
+      specifier: 4.0.0
+      version: 4.0.0
     hash-wasm:
       specifier: 4.12.0
       version: 4.12.0
+    pinyin-pro:
+      specifier: 3.29.4
+      version: 3.29.4
     prettier:
       specifier: 3.9.9
       version: 3.9.9
@@ -87,6 +93,28 @@ importers:
       argon2:
         specifier: 'catalog:'
         version: 0.45.1
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.1(@types/node@22.20.4)(vite@8.3.0(@types/node@22.20.4))
+
+  packages/domain:
+    dependencies:
+      '@askdaddy/vault':
+        specifier: workspace:*
+        version: link:../vault
+      fractional-indexing:
+        specifier: 'catalog:'
+        version: 4.0.0
+      pinyin-pro:
+        specifier: 'catalog:'
+        version: 3.29.4
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.20.4
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -611,6 +639,10 @@ packages:
   flatted@3.4.4:
     resolution: {integrity: sha512-5+ybhBZANEJxaH3X5evAFatUxLfEHSr7n6kYJ+1Qd0mUqr4eu9gIf6GDbWHf8RJijHrjjO8G+la14SlL2SeS1Q==}
 
+  fractional-indexing@4.0.0:
+    resolution: {integrity: sha512-Nr2P1Yyaj2sy1Qdt/wI3GcByxrUdbSKg5+cGvw8f18hT2SkQt6V72iOjBpk7IO3UkzBsdlGRs2a4z6dLrJprgw==}
+    engines: {node: ^14.13.1 || >=16.0.0}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -803,6 +835,9 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
+
+  pinyin-pro@3.29.4:
+    resolution: {integrity: sha512-SPXpDT2cHEy+d26V1RXYMlVzXN42hotFAak1fzyWPi4o2dKXb61UqD4pzxDJHwk6gbv8vQ6EfErd+hYX0Qhzug==}
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
@@ -1431,6 +1466,8 @@ snapshots:
 
   flatted@3.4.4: {}
 
+  fractional-indexing@4.0.0: {}
+
   fsevents@2.3.3:
     optional: true
 
@@ -1572,6 +1609,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
+
+  pinyin-pro@3.29.4: {}
 
   postcss@8.5.28:
     dependencies:
