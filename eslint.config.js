@@ -246,6 +246,13 @@ export default tseslint.config(
   },
 
   {
+    files: ['test/**'],
+    languageOptions: {
+      globals: { console: 'readonly', process: 'readonly', Buffer: 'readonly' },
+    },
+  },
+
+  {
     files: ['**/*.config.{js,mjs,cjs,ts}', 'eslint.config.js'],
     rules: {
       'no-restricted-imports': 'off',
