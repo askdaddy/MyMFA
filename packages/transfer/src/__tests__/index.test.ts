@@ -54,9 +54,10 @@ describe('公开出口契约', () => {
     expect(new Ctor('x')).toBeInstanceOf(api.TransferError)
   })
 
-  it('FORMAT_IDS 覆盖全部 8 个格式，且是只读数组的字面量来源', () => {
+  it('FORMAT_IDS 覆盖全部 9 个格式，且是只读数组的字面量来源', () => {
     expect([...api.FORMAT_IDS].sort()).toEqual(
       [
+        'ga-migration',
         '2fas',
         'aegis',
         'bitwarden',

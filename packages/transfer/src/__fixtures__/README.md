@@ -124,3 +124,9 @@ vendored 夹具里的同一批上游假密钥，因此可以做跨格式字节�
    （C8）。同理 Ente 的 `_getDigits`/`_getPeriod`/`_getAlgorithm` 在异常时静默回落到
    `defaultDigits`/`defaultPeriod`/`sha1`，而 `docs/transfer.md` §2.1 明确要求**查不到即报错**。
    夹具里的 `algorithm.sha256` / `Algorithm.SHA256` 就是用来钉住这条差异的。
+
+## GA 迁移（Issue #9）
+
+`ga_normal.json`、`ga_edge.json`、`ga_malformed.json` 均按 [Aegis schema](https://github.com/beemdevelopment/Aegis/blob/d6f4e5925a97e4e91593f1542085eae03432a759/app/src/main/proto/google_auth.proto) 构造，固定 commit `d6f4e5925a97e4e91593f1542085eae03432a759`。字段语义参照同 commit 的 `app/src/main/java/com/beemdevelopment/aegis/otp/GoogleAuthInfo.java`，wire 编码参照 [protobuf 官方编码规范](https://protobuf.dev/programming-guides/encoding/)。每份 JSON 的 `provenance` 是文件级来源标注。
+
+这些是**依据 schema 定义构造，非真实 App 导出**的脱敏测试夹具；只使用 RFC 4226 的公开假 secret。独立 Python writer 用 varint（负数转 uint64 二补码）、tag=(field_number*8+wire_type)、LEN 字节长度构造 payload，再用标准 base64 编成 URI；`hex` 固化原始字节，不使用被测生成器。正常覆盖 TOTP/HOTP；边界覆盖中文/冒号、两端 signed int32、最大安全 counter、部分失败与两片；畸形覆盖长度/varint/key/巨大声明。Aegis 的 schema 是开源兼容参考，并非 Google 官方迁移规范；GA 真机扫描待 #11。

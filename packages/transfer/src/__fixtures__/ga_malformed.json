@@ -1,0 +1,30 @@
+{
+  "provenance": "Aegis d6f4e5925a97e4e91593f1542085eae03432a759 app/src/main/proto/google_auth.proto; schema-constructed by independent Python wire writer; synthetic RFC4226 secret; NOT real App/device export",
+  "cases": [
+    {
+      "name": "truncated-length",
+      "uri": "otpauth-migration://offline?data=Cv8=",
+      "hex": "0aff"
+    },
+    {
+      "name": "invalid-varint",
+      "uri": "otpauth-migration://offline?data=gICAgICAgICAgIA=",
+      "hex": "8080808080808080808080"
+    },
+    {
+      "name": "zero-field",
+      "uri": "otpauth-migration://offline?data=AA==",
+      "hex": "00"
+    },
+    {
+      "name": "oversize-batch",
+      "uri": "otpauth-migration://offline?data=CjsKFDEyMzQ1Njc4OTAxMjM0NTY3ODkwEhJhbGljZUBleGFtcGxlLnRlc3QaCVN5bnRoZXRpYyABKAEwAhABGP////8HIAAoKg==",
+      "hex": "0a3b0a1431323334353637383930313233343536373839301212616c696365406578616d706c652e746573741a0953796e746865746963200128013002100118ffffffff072000282a"
+    },
+    {
+      "name": "entry-truncated-wire",
+      "uri": "otpauth-migration://offline?data=CgEIEAEYASAAKCo=",
+      "hex": "0a0108100118012000282a"
+    }
+  ]
+}

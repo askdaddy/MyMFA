@@ -17,6 +17,16 @@ export { parseBitwarden } from './bitwarden.js'
 export { openPlaintext, sealPlaintext } from './container.js'
 export { generateCsv, parseCsv, type CsvRecord, type CsvTable } from './csv.js'
 export { detect } from './detect.js'
+export {
+  parseGaMigration,
+  parseGaMigrationBatch,
+  generateGaMigration,
+  GA_MIGRATION_LIMITS,
+  type GaMigrationShard,
+  type GaMigrationBatchResult,
+  type GaMigrationExport,
+  type GaMigrationExportOptions,
+} from './ga-migration.js'
 export { parseEnte } from './ente.js'
 export { parseFreeOtpPlus } from './freeotp-plus.js'
 export { DEFAULT_TAG_SEPARATOR, parseGenericCsv, type GenericCsvMapping } from './generic-csv.js'

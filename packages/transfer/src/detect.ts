@@ -138,7 +138,7 @@ export function detect(input: DetectableInput): FormatId | undefined {
 
   // §4 第 1 步：成本最低的前缀判别。GA 的 scheme 是另一个字面量，必须先排除，
   // 绝不能把迁移二维码当成普通 URI 行（它属 #9）。
-  if (startsWithScheme(trimmed, GA_MIGRATION_PREFIX)) return undefined
+  if (startsWithScheme(trimmed, GA_MIGRATION_PREFIX)) return 'ga-migration'
   if (startsWithScheme(trimmed, OTPAUTH_PREFIX)) {
     // Ente 的裸 URI 导出与通用 otpauth 文本只差一个 `codeDisplay` 参数，但两者能还原的字段
     // 差很多（note / tags / trashed / position）。判成通用文本会让这些字段被静默丢弃，

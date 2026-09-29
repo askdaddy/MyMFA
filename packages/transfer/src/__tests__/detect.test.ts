@@ -39,8 +39,8 @@ describe('detect：§4 第 1 步 URI scheme 前缀', () => {
   it('otpauth-migration:// 不得被判为 otpauth-lines（属 #9）', () => {
     const migration = 'otpauth-migration://offline?data=CjQKDEhlbGxvIeW7uuaWsBIEVGVzdA%3D%3D'
     expect(detect(migration)).not.toBe('otpauth-lines')
-    expect(detect(migration)).toBeUndefined()
-    expect(detect(migration.toUpperCase())).toBeUndefined()
+    expect(detect(migration)).toBe('ga-migration')
+    expect(detect(migration.toUpperCase())).toBe('ga-migration')
   })
 
   it('多行裸 URI 文本判为 otpauth-lines', () => {

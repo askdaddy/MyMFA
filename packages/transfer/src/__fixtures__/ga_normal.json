@@ -1,0 +1,15 @@
+{
+  "provenance": "Aegis d6f4e5925a97e4e91593f1542085eae03432a759 app/src/main/proto/google_auth.proto; schema-constructed by independent Python wire writer; synthetic RFC4226 secret; NOT real App/device export",
+  "cases": [
+    {
+      "name": "totp-sha1",
+      "uri": "otpauth-migration://offline?data=CjsKFDEyMzQ1Njc4OTAxMjM0NTY3ODkwEhJhbGljZUBleGFtcGxlLnRlc3QaCVN5bnRoZXRpYyABKAEwAhABGAEgACgq",
+      "hex": "0a3b0a1431323334353637383930313233343536373839301212616c696365406578616d706c652e746573741a0953796e746865746963200128013002100118012000282a"
+    },
+    {
+      "name": "hotp-sha256",
+      "uri": "otpauth-migration://offline?data=Cj0KFDEyMzQ1Njc4OTAxMjM0NTY3ODkwEhJhbGljZUBleGFtcGxlLnRlc3QaCVN5bnRoZXRpYyACKAIwATgqEAEYASAAKCo=",
+      "hex": "0a3d0a1431323334353637383930313233343536373839301212616c696365406578616d706c652e746573741a0953796e746865746963200228023001382a100118012000282a"
+    }
+  ]
+}

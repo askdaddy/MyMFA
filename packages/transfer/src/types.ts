@@ -10,6 +10,7 @@ import type { EncryptedContainer, Entry, EntryAlgorithm, VaultData } from '@askd
  */
 
 export const FORMAT_IDS = [
+  'ga-migration',
   'mfavault-plaintext',
   'aegis',
   '2fas',
@@ -132,10 +133,13 @@ export interface ExportDegradation {
 }
 
 /**
- * 只覆盖本 Issue 已实现的两个生成器。本 App 明文备份（`container.ts`）在 §3.1 里全是 ✅，
- * 无需登记；GA 迁移码属 #9，加密 Aegis 属 #10，等它们落地时再补各自的行。
+ * 本 App 明文备份完整保留字段，无需登记。
  */
 export const EXPORT_DEGRADATIONS = {
+  'ga-migration': {
+    dropped: ['note', 'tagIds', 'sites', 'usageCount', 'lastUsedAt', 'position', 'favorite'],
+    degraded: [],
+  },
   aegis: {
     dropped: ['sites', 'usageCount', 'lastUsedAt', 'favorite'],
     degraded: ['position'],
@@ -144,4 +148,4 @@ export const EXPORT_DEGRADATIONS = {
     dropped: ['note', 'tagIds', 'sites', 'usageCount', 'lastUsedAt', 'position', 'favorite'],
     degraded: [],
   },
-} as const satisfies Readonly<Record<'aegis' | 'otpauth-lines', ExportDegradation>>
+} as const satisfies Readonly<Record<'aegis' | 'otpauth-lines' | 'ga-migration', ExportDegradation>>
