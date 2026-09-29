@@ -1,0 +1,10 @@
+folder,favorite,type,name,notes,uri,username,totp
+Work/Servers,1,login,Deno,"备注含 ""引号""、逗号, 和
+换行",https://deno.land,alice@example.com,4SJHB4GSD43FZBAI7C2HLRJGPQ
+,0,login,Airbnb,,https://airbnb.com,bob@ex ample.com,otpauth://totp/Airbnb:Elijah?secret=7ELGJSGXNCCTV3O6LKJWYFV2RA&issuer=Airbnb&algorithm=SHA512&digits=8&period=50
+,,login,Issuu,,,,otpauth://hotp/Issuu:James?secret=YOOMIXWS5GN6RTBPUFFWKTW5M4&issuer=Issuu&algorithm=SHA1&digits=6
+,,login,WWE,,,mason,otpauth://hotp/WWE:Mason?secret=5VAML3X35THCEBVRLV24CGBKOY&issuer=WWE&algorithm=SHA512&digits=8&counter=10300
+,,login,Boeing,,,,steam://JRZCL47CMXVOQMNPZR2F7J4RGI
+,,login,航空 张三,,,,
+,,note,Secure Note,没有 totp 的备注行,,,
+Personal,1,login,SPDX,含 # 与 %,https://spdx.org?a=1&b=2,james,otpauth://totp/SPDX:James?secret=5OM4WOOGPLQEF6UGN3CPEOOLWU&issuer=SPDX&algorithm=SHA256&digits=7&period=20

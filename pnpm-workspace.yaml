@@ -2,6 +2,12 @@ packages:
   - 'packages/*'
   - 'apps/*'
 
+# argon2 的 install 脚本（node-gyp-build）只在平台缺少预编译产物时才需要从源码构建；
+# 该包随发布附带 N-API prebuilds，运行时直接加载即可（2026-09-24 实测：
+# 未执行构建脚本也能正确复现 RFC 9106 §5.3 官方向量）。不执行 postinstall 同时减少供应链面。
+allowBuilds:
+  argon2: false
+
 # 统一版本管理：各包用 "catalog:" 引用，避免跨包版本漂移。
 # typescript 钉死精确版本——typescript-eslint 的 peer 上限是 <6.1.0，
 # 已发布的 TypeScript 7.x 在 ESLint 工具链上尚不可用。
@@ -15,6 +21,12 @@ catalog:
   '@eslint/js': 10.0.1
   typescript-eslint: 8.70.1
   prettier: 3.9.9
+
+  # packages/crypto-web 的 Argon2id 实现（AGENTS.md §5.2：必需的 WASM 仅限此处）。
+  hash-wasm: 4.12.0
+  # 仅作测试对照实现，绑定 P-H-C/phc-winner-argon2 官方参考实现，禁止进入生产依赖
+  # （docs/testing.md §3.2「Web 端的等价论证链」）。
+  argon2: 0.45.1
 
 # 由 pnpm 自动写入：全局配置启用了 minimumReleaseAge（新发布包需冷却期，供应链防护），
 # prettier 3.9.9 发布时间过近被显式豁免。升级 prettier 后可删除此项让 pnpm 重新评估。

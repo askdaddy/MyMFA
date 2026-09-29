@@ -60,7 +60,7 @@ test/           QA 黑盒测试脚本
 
 因此 `crypto-web` 作为**平台适配包**存在，是 `packages/*` 平台禁令的唯一例外：
 
-- 允许 `hash-wasm`（AGENTS.md §5.2 许可的唯一 WASM 用途）与 WebCrypto 全局（`crypto.subtle`、`crypto.getRandomValues`）
+- 允许 `hash-wasm`（AGENTS.md §5.2 许可的唯一 WASM 用途）、WebCrypto 全局（`crypto.subtle`、`crypto.getRandomValues`）与 `CompressionStream` / `DecompressionStream`（gzip，同为浏览器与 MV3 service worker 原生具备）
 - **仍然禁止** Node 内置模块与 `process` / `Buffer` / `require` / `chrome.*`，保证它能在浏览器与 MV3 service worker 里原样运行
 - 仍然禁止被任何核心包依赖，方向只能是 `apps/* → crypto-web → crypto`
 
@@ -92,10 +92,13 @@ ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-res
 
 只定义接口与参数常量，不含平台实现：
 
-- `KdfProvider`：`deriveKey(password, salt, params) → Uint8Array`
+- `KdfProvider`：`deriveKey(password, salt, params) → Uint8Array`。`name` 当前被钉成字面量 `'argon2id'`；容纳 [ADR-018](decisions.md#adr-018) 豁免的 scrypt / PBKDF2 需要扩展这个接口，属跨包契约变更，须先改文档再改代码
 - `AeadProvider`：`encrypt(key, plaintext, aad?) → {nonce, ciphertext, tag}` / `decrypt(...)`
 - `RandomProvider`：密码学安全随机数
 - `SecureStore`：平台安全存储（Keychain / Keystore / `chrome.storage.session`）
+- `CompressProvider`：`compress(bytes) → Uint8Array` / `decompress(bytes) → Uint8Array`，`name` 恒为 `'gzip'`
+
+**`CompressProvider` 与前四个不同，它不是加密原语**。放进 `packages/crypto` 是因为它同样需要平台注入（Web 用 `CompressionStream`，Hermes 不提供该 API，移动端必须走原生模块），而不是因为它涉及安全。相应地它的跨端一致性要求**弱于** KDF / AEAD：只要求任何一端能解开其他端产出的 gzip 流，**不要求**压缩输出字节级一致，理由与陷阱见 [testing.md §4.2](testing.md#42-gzip-的跨端一致性是弱要求)。
 
 各端实现位置：
 
@@ -107,15 +110,17 @@ ESLint `no-restricted-imports`（内部包白名单 + 平台模块）与 `no-res
 
 Web 侧之所以独立成 `packages/crypto-web` 而不是放进各 app，见 [§3.1](#31-为什么-crypto-web-是例外)。`SecureStore` 不设共用包——三端实现毫无重叠（Keychain / Keystore / `chrome.storage.session`），各自留在 `apps/*`。
 
+`CompressProvider` 的实现位置：Web / 扩展 / Tauri 前端在 `packages/crypto-web`（平台原生 `CompressionStream('gzip')`，无新依赖）；Android / iOS 在 `apps/mobile` 原生模块——**Hermes 不提供 `CompressionStream`**，与 Argon2id 一样无法复用 Web 实现。
+
 `packages/crypto` 还负责定义 Argon2id 参数常量（`memoryKiB` / `iterations` / `parallelism` / `saltLength` / `keyLength`）与统一的错误类型。**参数常量只能放在这里**：三端实现各自硬编码数字，是单位混淆（MiB vs KiB）导致跨端不一致的头号来源（见 [testing.md §3](testing.md#3-跨端加密一致性测试最高优先级)）。
 
 三端实现必须通过 [跨端一致性测试](testing.md#3-跨端加密一致性测试最高优先级) 验证字节级一致。
 
 ### 4.3 `packages/vault`
 
-- 数据模型类型定义与运行时校验（zod 或手写守卫）
-- 序列化 / 反序列化（含 gzip 压缩）
-- 加密容器封装与解封
+- 数据模型类型定义与运行时校验（**手写类型守卫**，不引入 zod——zod 默认剥除未知字段，与"未知字段原样保留"的前向兼容规则冲突，见 [vault-format.md §5.3](vault-format.md#53-未知字段)）
+- 序列化 / 反序列化：gzip 压缩能力**通过注入的 `CompressProvider` 获得**，vault 自己不实现压缩、也不直接调用任何平台 API（`zlib` 被平台禁令拦截，`CompressionStream` 在 Hermes 上不存在）。校验函数**只判定不重建**，直接返回入参对象，这是未知字段得以保留的机制保证
+- 加密容器封装与解封（只处理 `encrypted: true`；明文容器属 `packages/transfer`）
 - `schemaVersion` 迁移链：`v0 → v1 → ...`，每步一个纯函数，禁止跳版本迁移
 - 双层密钥管理：DEK 生成、KEK 派生、包裹与解包
 
@@ -124,6 +129,8 @@ Web 侧之所以独立成 `packages/crypto-web` 而不是放进各 app，见 [§
 - 每个外部格式一个模块，统一暴露 `detect(input)` / `parse(input, options)` / `generate(vault, options)`
 - 格式探测器：JSON 按特征字段判别，文本按 `otpauth://` / `otpauth-migration://` 前缀判别
 - 解析失败必须给出**行级/条目级**错误，支持"部分成功导入"而非全量回滚
+- **明文容器**（`encrypted: false`）的封装与解封归本包，`packages/vault` 只处理加密容器并显式拒绝明文（[vault-format.md §1.2](vault-format.md#12-未加密容器)）
+- 第三方**加密**备份的兼容路径（Aegis scrypt、2FAS / Raivio PBKDF2）走 [ADR-018](decisions.md#adr-018) 的豁免，四个边界条件必须全部满足；`packages/vault` 不得依赖该路径
 - 详细矩阵见 [transfer.md](transfer.md)
 
 ### 4.5 `packages/domain`
@@ -140,7 +147,7 @@ Web 侧之所以独立成 `packages/crypto-web` 而不是放进各 app，见 [§
 
 - Expo prebuild 工作流，通过 config plugin 注入自定义原生模块
 - 原生模块职责：Argon2id、SecureStore（Keychain/Keystore）、生物识别、防截屏、二维码扫描与生成、局域网 HTTP 服务
-- **Hermes 不支持 WASM**，因此 Argon2id 必须走原生模块，不能复用 `hash-wasm`。这是移动端与 Web 端唯一无法共享实现的部分
+- **Hermes 不支持 WASM**，因此 Argon2id 必须走原生模块，不能复用 `hash-wasm`；Hermes 同样不提供 `CompressionStream`，gzip 也必须走原生模块。这两处是移动端与 Web 端无法共享实现的部分
 - 推荐 `react-native-quick-crypto` 提供 node-compatible crypto API（依赖新架构，需在 M0 验证兼容性）
 
 ### 5.2 Chrome 扩展
@@ -166,10 +173,10 @@ Tauri 2.x，前端复用 `apps/extension` 的 React 组件层，Rust 侧提供 A
 
 ## 7. 关键架构风险
 
-| 风险                       | 缓解措施                                       | 验证阶段               |
-| -------------------------- | ---------------------------------------------- | ---------------------- |
-| Argon2id 三端输出不一致    | 官方测试向量 + 跨端字节比对 CI                 | **M0（必须最早验证）** |
-| RN 加密生态与新架构兼容性  | M0 做最小可运行原型，验证 quick-crypto 可用    | M0                     |
-| MV3 SW 回收导致解锁态丢失  | `chrome.storage.session` + 早期原型验证        | M4 前                  |
-| 导入格式字段名与文档不符   | 以真实样本为准建立 golden test，不信任二手资料 | M2                     |
-| 恶意导入文件导致崩溃或注入 | 解析器纯函数化 + 模糊测试 + 禁用动态执行       | M2                     |
+| 风险                       | 缓解措施                                                                                                                                          | 验证阶段               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| Argon2id 三端输出不一致    | 官方测试向量 + 跨端字节比对 CI                                                                                                                    | **M0（必须最早验证）** |
+| RN 加密生态与新架构兼容性  | M0 做最小可运行原型，验证 quick-crypto 可用                                                                                                       | M0                     |
+| MV3 SW 回收导致解锁态丢失  | `chrome.storage.session` + 早期原型验证                                                                                                           | M4 前                  |
+| 导入格式字段名与文档不符   | 以一手来源（各 App 开源仓库 schema / 官方文档）为准建立 golden test，不信任社区逆向资料，见 [ADR-019](decisions.md#adr-019)；真机校准为后续跟进项 | M2                     |
+| 恶意导入文件导致崩溃或注入 | 解析器纯函数化 + 模糊测试 + 禁用动态执行                                                                                                          | M2                     |

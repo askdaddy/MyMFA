@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // types:[] 只摘掉 @types/node（process / Buffer / require 在类型层面即不可用）；
+    // WebCrypto 类型来自 lib 的 DOM，本包正是被允许使用它的平台适配包（AGENTS.md §3）。
+    "types": [],
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**"]
+}

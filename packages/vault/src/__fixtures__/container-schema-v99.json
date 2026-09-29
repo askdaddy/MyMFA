@@ -1,0 +1,27 @@
+{
+  "format": "mfavault",
+  "version": 1,
+  "schemaVersion": 99,
+  "encrypted": true,
+  "crypto": {
+    "kdf": {
+      "name": "argon2id",
+      "memoryKiB": 65536,
+      "iterations": 3,
+      "parallelism": 4,
+      "salt": "TXlNRkFzYWx0Zml4dHVyZQ==",
+      "keyLength": 32
+    },
+    "cipher": {
+      "name": "aes-256-gcm",
+      "nonce": "TXlNRkFub25jZTAx",
+      "tag": "TXlNRkF0YWdmaXh0dXJlIQ=="
+    },
+    "wrappedMasterKey": {
+      "nonce": "d3JhcG5vbmNlMDAx",
+      "tag": "d3JhcHRhZ2ZpeHR1cmUhIQ==",
+      "data": "d3JhcHBlZGRla2ZpeHR1cmUwMDAwMDAwMDAwMDAwMDE="
+    }
+  },
+  "data": "RklYVFVSRS1OT1QtUkVBTC1DSVBIRVJURVhU"
+}

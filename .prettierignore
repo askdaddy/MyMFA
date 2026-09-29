@@ -9,3 +9,9 @@ coverage
 apps/mobile/android
 apps/mobile/ios
 apps/desktop/src-tauri/target
+
+# golden 夹具的字节就是测试输入：vendored 文件必须与上游逐字节一致，
+# 重排缩进等于篡改样本，自构造文件同理（见该目录 README 的来源标注）。
+packages/transfer/src/__fixtures__/
+# README 是说明文字而非测试数据，照常受 Prettier 约束。
+!packages/transfer/src/__fixtures__/README.md

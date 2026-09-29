@@ -1,0 +1,67 @@
+{
+  "format": "mfavault",
+  "version": 1,
+  "schemaVersion": 0,
+  "encrypted": false,
+  "data": {
+    "schemaVersion": 0,
+    "meta": {
+      "createdAt": 1737000000000,
+      "updatedAt": 1737000600000,
+      "appVersion": "0.9.0"
+    },
+    "entries": [
+      {
+        "id": "019c0f6a-0000-7000-8000-000000000001",
+        "kind": "totp",
+        "issuer": "Deno",
+        "account": "Mason",
+        "secret": "5JJw8NIfNlyECPi0dcUmfA==",
+        "algo": "SHA1",
+        "digits": 6,
+        "period": 30,
+        "tagIds": [
+          "019c0f6a-0000-7000-8000-00000000000a"
+        ],
+        "note": "明文容器夹具",
+        "sites": [
+          "deno.land"
+        ],
+        "usageCount": 3,
+        "lastUsedAt": 1737000600000,
+        "position": "a0",
+        "favorite": true,
+        "createdAt": 1737000000000,
+        "updatedAt": 1737000600000
+      },
+      {
+        "id": "019c0f6a-0000-7000-8000-000000000002",
+        "kind": "hotp",
+        "issuer": "WWE",
+        "account": "Mason",
+        "secret": "7UDF7vvsziIGsV11wRgqdg==",
+        "algo": "SHA512",
+        "digits": 8,
+        "counter": 10300,
+        "tagIds": [],
+        "note": "",
+        "sites": [],
+        "usageCount": 0,
+        "lastUsedAt": null,
+        "position": "a1",
+        "favorite": false,
+        "createdAt": 1737000000000,
+        "updatedAt": 1737000000000
+      }
+    ],
+    "tags": [
+      {
+        "id": "019c0f6a-0000-7000-8000-00000000000a",
+        "name": "工作",
+        "color": "#5B8DEF",
+        "position": "a0"
+      }
+    ],
+    "legacyFieldFromV0": "v0 时代的字段，迁移后必须原样保留"
+  }
+}

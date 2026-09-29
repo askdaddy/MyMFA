@@ -1,0 +1,5 @@
+# golden 夹具是**逐字节**输入，行尾本身就是被测行为：`generic_csv_edge.csv` 的 CRLF 对应
+# RFC 4180 §2.1，而 `core.autocrlf=input` 会把它规范化成 LF——入库后 clone 出来的夹具不再含
+# CR，解析器仍会通过（它同时接受 LF），但 CRLF 分支的覆盖会静默消失。
+packages/transfer/src/__fixtures__/** -text
+packages/vault/src/__fixtures__/** -text

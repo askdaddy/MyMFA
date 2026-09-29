@@ -1,0 +1,29 @@
+{
+  "format": "mfavault",
+  "version": 1,
+  "schemaVersion": 1,
+  "encrypted": true,
+  "data": {
+    "id": "019c0f6a-0000-7000-8000-000000000001",
+    "kind": "totp",
+    "issuer": "Deno",
+    "account": "Mason",
+    "secret": "5JJw8NIfNlyECPi0dcUmfA==",
+    "algo": "SHA1",
+    "digits": 6,
+    "period": 30,
+    "tagIds": [
+      "019c0f6a-0000-7000-8000-00000000000a"
+    ],
+    "note": "明文容器夹具",
+    "sites": [
+      "deno.land"
+    ],
+    "usageCount": 3,
+    "lastUsedAt": 1737000600000,
+    "position": "a0",
+    "favorite": true,
+    "createdAt": 1737000000000,
+    "updatedAt": 1737000600000
+  }
+}

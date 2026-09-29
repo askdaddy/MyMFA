@@ -107,14 +107,28 @@ const PLATFORM_SDK_PATTERNS = [
 ]
 
 // 加密实现库单独一条，因为 packages/crypto-web 是唯一被允许使用它的地方。
+// 裸名 `argon2` 必须与 `argon2-*` 并列：patterns 是 gitignore 风格，后者匹配不到前者。
 const CRYPTO_IMPL_PATTERN = {
-  group: ['hash-wasm', 'argon2-*', 'libsodium*', '@noble/*'],
+  group: ['hash-wasm', 'argon2', 'argon2-*', 'libsodium*', '@noble/*'],
   message:
     '加密原语的实现库只允许出现在 packages/crypto-web 或 apps/* 的原生模块里；' +
     'packages/crypto 只定义接口与参数常量（AGENTS.md §5.1）',
 }
 
 const CORE_PACKAGE_PATTERNS = [...PLATFORM_SDK_PATTERNS, CRYPTO_IMPL_PATTERN]
+
+/**
+ * crypto-web 的例外只到 hash-wasm 为止：其余实现库是测试对照（devDependency），
+ * 只能在测试文件里出现——文件末尾针对测试目录的 override 已为其关闭本规则。
+ */
+const ORACLE_IMPL_PATTERN = {
+  group: CRYPTO_IMPL_PATTERN.group.filter((name) => name !== 'hash-wasm'),
+  message:
+    '对照实现（node-argon2 / libsodium / @noble）只允许出现在测试文件里；' +
+    'packages/crypto-web 的生产代码只能用 hash-wasm 与 WebCrypto（docs/testing.md §3.2）',
+}
+
+const WEB_ADAPTER_PATTERNS = [...PLATFORM_SDK_PATTERNS, ORACLE_IMPL_PATTERN]
 
 const PLATFORM_GLOBALS = [
   'window',
@@ -156,7 +170,7 @@ const internalDepRules = Object.entries(INTERNAL_DEPS).map(([pkg, allowed]) => {
         {
           paths: NODE_BUILTIN_PATHS,
           patterns: [
-            ...(isWebAdapter ? PLATFORM_SDK_PATTERNS : CORE_PACKAGE_PATTERNS),
+            ...(isWebAdapter ? WEB_ADAPTER_PATTERNS : CORE_PACKAGE_PATTERNS),
             {
               group: INTERNAL_PACKAGES.filter((p) => !allowed.includes(p)).map(
                 (p) => `@askdaddy/${p}`,

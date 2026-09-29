@@ -1,0 +1,20 @@
+otpauth://totp/Deno:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ%3D%3D%3D%3D%3D%3D&issuer=Deno&algorithm=SHA1&digits=6&period=30
+otpauth://totp/SPDX:James?secret=5OM4WOOGPLQEF6UGN3CPEOOLWU%3D%3D&issuer=SPDX&algorithm=SHA256&digits=7&period=20
+otpauth://hotp/Air Canada:Benjamin?secret=KUVJJOM753IHTNDSZVCNKL7GII&issuer=Air+Canada&algorithm=SHA256&digits=7&counter=50
+otpauth://totp/Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&algorithm=SHA1&digits=6&period=30
+otpauth://totp/Deno:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=WWE&algorithm=SHA1&digits=6&period=30
+otpauth://totp/Issuer:Account:extra?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=Issuer&algorithm=SHA1&digits=6&period=30
+otpauth://hotp/WWE:Mason?secret=5VAML3X35THCEBVRLV24CGBKOY&issuer=WWE&algorithm=SHA512&digits=8
+otpauth://totp/Airbnb:Elijah?secret=7ELGJSGXNCCTV3O6LKJWYFV2RA&issuer=Airbnb&algorithm=SHA512&digits=8
+https://example.com/totp/Deno:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=Deno&algorithm=SHA1&digits=6&period=30
+OTPAUTH://totp/Deno:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=Deno&algorithm=SHA1&digits=6&period=30
+
+   
+otpauth://steam/Boeing:Sophia?secret=JRZCL47CMXVOQMNPZR2F7J4RGI&issuer=Boeing&algorithm=SHA1&digits=5&period=30
+otpauth://totp/TooMany:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=TooMany&algorithm=SHA1&digits=10&period=30
+otpauth://totp/ZeroPeriod:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=ZeroPeriod&algorithm=SHA1&digits=6&period=0
+otpauth://hotp/NegCounter:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=NegCounter&algorithm=SHA1&digits=6&counter=-1
+otpauth://totp/NoSecret:Mason?issuer=NoSecret&algorithm=SHA1&digits=6&period=30
+totp/Deno:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=Deno&algorithm=SHA1&digits=6&period=30
+otpauth://totp/Fragment:Mason?secret=4SJHB4GSD43FZBAI7C2HLRJGPQ&issuer=Fragment&algorithm=SHA1&digits=6&period=30#notes-here
+otpauth://totp/Weird:Mason?issuer=Weird.period=99&algorithm=SHA1&digits=6&period=30&secret=4SJHB4GSD43FZBAI7C2HLRJGPQ

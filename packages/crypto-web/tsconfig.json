@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // WebCrypto 的类型只存在于 DOM lib；根 tsconfig.base.json 刻意不带 DOM，
+    // 因为核心包必须平台无关，这里是 docs/architecture.md §3.1 认定的唯一例外。
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"]
+  },
+  "include": ["src", "*.config.ts"]
+}

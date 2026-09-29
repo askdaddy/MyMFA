@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "header": {
+    "slots": null,
+    "params": null
+  },
+  "db": {
+    "version": 3,
+    "groups": [
+      {
+        "uuid": "6f9e0c1a-1111-4222-8333-aaaaaaaaaaaa",
+        "name": "工作"
+      },
+      {
+        "uuid": "6f9e0c1a-4444-4555-8666-bbbbbbbbbbbb",
+        "name": "个人"
+      }
+    ],
+    "entries": [
+      {
+        "type": "totp",
+        "uuid": "3ae6f1ad-2e65-4ed2-a953-1ec0dff2386d",
+        "name": "Mason",
+        "issuer": "Deno",
+        "icon": null,
+        "icon_mime": null,
+        "note": "两个分组都要挂上",
+        "groups": [
+          "6f9e0c1a-1111-4222-8333-aaaaaaaaaaaa",
+          "6f9e0c1a-4444-4555-8666-bbbbbbbbbbbb"
+        ],
+        "info": {
+          "secret": "4SJHB4GSD43FZBAI7C2HLRJGPQ",
+          "algo": "SHA1",
+          "digits": 6,
+          "period": 30
+        }
+      },
+      {
+        "type": "hotp",
+        "uuid": "b25f8815-007f-40f7-a700-ce058ac05435",
+        "name": "Mason",
+        "issuer": "WWE",
+        "icon": null,
+        "icon_mime": null,
+        "note": "引用了不存在的分组 uuid",
+        "groups": [
+          "6f9e0c1a-9999-4999-8999-cccccccccccc"
+        ],
+        "info": {
+          "secret": "5VAML3X35THCEBVRLV24CGBKOY",
+          "algo": "SHA512",
+          "digits": 8,
+          "counter": 10300
+        }
+      },
+      {
+        "type": "totp",
+        "uuid": "3deaff2e-f181-4837-80e1-fdf0c54e9363",
+        "name": "Elijah",
+        "issuer": "Airbnb",
+        "icon": null,
+        "icon_mime": null,
+        "note": "",
+        "groups": [],
+        "info": {
+          "secret": "7ELGJSGXNCCTV3O6LKJWYFV2RA",
+          "algo": "SHA512",
+          "digits": 8,
+          "period": 50
+        }
+      }
+    ]
+  }
+}

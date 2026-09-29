@@ -27,6 +27,19 @@ export interface RandomProvider {
 }
 
 /**
+ * gzip 压缩。**不是加密原语**，放在这里只是因为它同样需要平台注入：
+ * Web 用 `CompressionStream`，Hermes 不提供该 API，移动端必须走原生模块。
+ *
+ * 跨端一致性要求弱于 KDF / AEAD：只要求任何一端能解开其他端产出的 gzip 流，
+ * **不要求**压缩输出字节级一致（压缩级别、OS 字节、mtime 均允许实现差异）。
+ */
+export interface CompressProvider {
+  readonly name: 'gzip'
+  compress(bytes: Uint8Array): Promise<Uint8Array>
+  decompress(bytes: Uint8Array): Promise<Uint8Array>
+}
+
+/**
  * 设备安全存储：iOS Keychain / Android Keystore / `chrome.storage.session`。
  * 只用于存放生物识别包裹的 DEK 与解锁态，**禁止**用它持久化任何可导出内容（AGENTS.md §5.1）。
  */
@@ -40,5 +53,6 @@ export interface CryptoProviders {
   kdf: KdfProvider
   aead: AeadProvider
   random: RandomProvider
+  compress: CompressProvider
   secureStore: SecureStore
 }

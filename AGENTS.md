@@ -26,11 +26,25 @@ git 已初始化，分支 `main`，远端 `git@github.com:askdaddy/MyMFA.git`。
 - ✅ `docs/` 设计基线（16 条 ADR 全部确认，无阻塞性待决策项，见 `docs/decisions.md`）
 - ✅ monorepo 脚手架与平台禁令强制机制
 - ✅ `packages/otp`：base32 / HOTP / TOTP / 预提示 / 时钟偏移，通过 RFC 4226 附录 D 与 RFC 6238 附录 B 全部官方测试向量
-- ⬜ `packages/crypto`、三端 Argon2id 一致性验证、`vault` / `transfer` / `domain`、全部 apps
+- ✅ `packages/crypto`：KDF / AEAD / 随机数 / 安全存储四个 Provider 接口、Argon2id 与 AES-256-GCM 参数常量、纯 TS 的 base64 与 UTF-8、三端共用参考向量
+- ✅ `packages/crypto-web`：Web Provider（hash-wasm Argon2id KDF / WebCrypto AES-256-GCM AEAD / 随机数）与一致性验证（RFC 9106 KAT + node-argon2 对照 + OpenSSL 双向比对）；`SecureStore` 未实现，随 Chrome 扩展一并落地
+- ✅ `packages/vault`：数据模型与手写类型守卫、UUID v7、schema 迁移链、双层密钥模型（Argon2id 派生 KEK 包裹随机 DEK）、AES-256-GCM 加密容器读写、O(1) 改主密码、锁定时清零
+- ⬜ `transfer` / `domain`、全部 apps
+
+vault 层**尚未**包含以下能力，别在这里找：
+
+- 明文（未加密）容器的封装与解封 → `packages/transfer`（Issue #4）
+- 自动备份与滚动保留 → app 端职责（Issue #6 / M3），vault 只负责产出序列化字节
+- fractional index 的生成与重排 → `packages/domain`（Issue #5），vault 只校验 `position` 是非空字符串
+- `biometricWrappedDek` 与 `SecureStore` → Issue #6（扩展）/ M3（移动端）；`EncryptedContainer` 类型层面就不存在该字段
 
 `docs/` 是唯一的设计基线，实现必须与之一致；若实现中发现设计有误，先改文档再改代码。
 
-**M0 出口标准未达成前，禁止开始 vault 层实现**（见 `docs/security.md` §4）。
+M0 出口标准按端拆分为两部分：**Web 端部分**（Argon2id KAT 通过 + 生产参数下与参考实现字节级一致 + 对照向量固化为跨端比对基线）已于 2026-09-24 达成（Issue #2）；**移动端部分**（Android / iOS 与同一份固化基线字节级一致）仍待 M3 开工前补齐。固化基线为 `packages/crypto/src/vectors.ts` 的 `ARGON2ID_PRODUCTION_VECTOR`，移动端后续比对的正是同一份向量。
+
+完整定义、拆分依据与两部分的契约见 `docs/roadmap.md` M0 与 `docs/security.md` §4——**本文件不另立标准**，以免两处表述漂移。
+
+当前迭代范围为用户于 2026-09-24 确认的 **Web 端 MVP**：M0 Web 侧 → M1 vault → M2 导入导出 → `packages/domain` → M4 Chrome 扩展；移动端 M3、局域网配对 M5、上架 M6 后置。跟踪见 Issue #1。
 
 ## 3. 目录结构
 
@@ -39,9 +53,9 @@ git 已初始化，分支 `main`，远端 `git@github.com:askdaddy/MyMFA.git`。
 ```
 packages/
   otp/         ✅ @askdaddy/otp        TOTP/HOTP 算法、base32、摘要算法抽象（零平台依赖）
-  crypto/      ⬜ @askdaddy/crypto     KDF/AEAD/随机数/安全存储的接口与参数常量（零平台依赖）
-  crypto-web/  ⬜ @askdaddy/crypto-web Web Provider：hash-wasm Argon2id + WebCrypto AES-GCM
-  vault/       ⬜ @askdaddy/vault      数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
+  crypto/      ✅ @askdaddy/crypto     KDF/AEAD/随机数/安全存储的接口与参数常量（零平台依赖）
+  crypto-web/  ✅ @askdaddy/crypto-web Web Provider：hash-wasm Argon2id + WebCrypto AES-GCM
+  vault/       ✅ @askdaddy/vault      数据模型、加解密、序列化、schema 版本迁移（零平台依赖）
   transfer/    ⬜ @askdaddy/transfer   导入导出格式解析器与生成器、格式探测器（零平台依赖）
   domain/      ⬜ @askdaddy/domain     排序、搜索、tag、使用统计、域名匹配（零平台依赖）
 apps/
@@ -62,22 +76,22 @@ test/         ⬜ QA 黑盒测试脚本
 
 已落地：
 
-| 命令                           | 作用                                        |
-| ------------------------------ | ------------------------------------------- |
-| `pnpm install`                 | 安装依赖                                    |
-| `pnpm build`                   | 构建全部 package（`tsc` → `dist`）          |
-| `pnpm typecheck`               | 全仓 TypeScript 严格类型检查                |
-| `pnpm lint`                    | 根级 `eslint .`，含平台禁令与依赖方向白名单 |
-| `pnpm format` / `format:check` | Prettier 写入 / 校验                        |
-| `pnpm test`                    | Vitest 单元测试（含 RFC 官方测试向量）      |
+| 命令                           | 作用                                                                                                     |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `pnpm install`                 | 安装依赖                                                                                                 |
+| `pnpm build`                   | 构建全部 package（`tsc` → `dist`）                                                                       |
+| `pnpm typecheck`               | 全仓 TypeScript 严格类型检查                                                                             |
+| `pnpm lint`                    | 根级 `eslint .`，含平台禁令与依赖方向白名单                                                              |
+| `pnpm format` / `format:check` | Prettier 写入 / 校验                                                                                     |
+| `pnpm test`                    | Vitest 单元测试（含 RFC 官方测试向量）                                                                   |
+| `pnpm test:cross`              | **跨端加密一致性测试**（Argon2id/AES-GCM 字节级比对）；当前覆盖 Web 端，Android/iOS 待 M3 接入同一份基线 |
 
 规划中，尚未实现：
 
-| 命令                | 作用                                                  |
-| ------------------- | ----------------------------------------------------- |
-| `pnpm test:cross`   | **跨端加密一致性测试**（Argon2id/AES-GCM 字节级比对） |
-| `pnpm mobile:start` | 启动 RN 开发服务                                      |
-| `pnpm ext:dev`      | 启动扩展开发构建（watch）                             |
+| 命令                | 作用                      |
+| ------------------- | ------------------------- |
+| `pnpm mobile:start` | 启动 RN 开发服务          |
+| `pnpm ext:dev`      | 启动扩展开发构建（watch） |
 
 `pnpm lint` 只在根级运行：ESLint flat config 集中在 `eslint.config.js`，规则按路径分域，分包运行反而会漏掉跨包规则。
 

@@ -12,6 +12,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
     "test": "turbo run test",
+    "test:cross": "turbo run test:cross",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

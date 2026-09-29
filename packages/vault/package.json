@@ -1,0 +1,33 @@
+{
+  "name": "@askdaddy/vault",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "数据模型与运行时校验、双层密钥管理、加密容器读写、序列化与 schema 迁移，零平台依赖",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@askdaddy/crypto": "workspace:*",
+    "@askdaddy/otp": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

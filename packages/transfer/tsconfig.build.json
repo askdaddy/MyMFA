@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // types:[] 让发布产物在**类型层面**也无法访问 Node/DOM 全局，
+    // 与 ESLint 的 no-restricted-imports 一起构成 packages/* 平台禁令的双重保障。
+    "types": [],
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  // resolveJsonModule 开启时 include 会把 .json 也当作根文件，
+  // golden 夹具（含脱敏的第三方导出样本）不得进入发布产物。
+  "exclude": ["src/**/*.test.ts", "src/**/__tests__/**", "src/**/__fixtures__/**"]
+}

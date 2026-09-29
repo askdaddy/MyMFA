@@ -1,0 +1,26 @@
+{
+  "services": {
+    "0": {
+      "name": "Deno",
+      "secret": "4SJHB4GSD43FZBAI7C2HLRJGPQ",
+      "updatedAt": 1702934567518,
+      "otp": {
+        "account": "Mason",
+        "issuer": "Deno",
+        "digits": 6,
+        "period": 30,
+        "algorithm": "SHA1",
+        "tokenType": "TOTP"
+      },
+      "order": {
+        "position": 0
+      }
+    }
+  },
+  "groups": [],
+  "updatedAt": 1702934732299,
+  "schemaVersion": 4,
+  "appVersionCode": 5000009,
+  "appVersionName": "5.1.0",
+  "appOrigin": "android"
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 0,
+  "meta": {
+    "createdAt": 1737000000000,
+    "updatedAt": 1737000000000,
+    "appVersion": "0.9.0"
+  },
+  "entries": [
+    {
+      "id": "019c0f6a-0000-7000-8000-000000000001",
+      "kind": "totp",
+      "issuer": "GitHub",
+      "account": "alice@example.com",
+      "secret": "SkJTV1kzRFBFSFBLM1BYUA==",
+      "algo": "SHA1",
+      "digits": 6,
+      "period": 30,
+      "tagIds": ["019c0f6a-0000-7000-8000-00000000000a"],
+      "note": "迁移夹具，secret 是 RFC 4226 附录 D 的假值",
+      "sites": ["github.com"],
+      "usageCount": 12,
+      "lastUsedAt": 1737000600000,
+      "position": "a0",
+      "favorite": true,
+      "createdAt": 1737000000000,
+      "updatedAt": 1737000600000
+    },
+    {
+      "id": "019c0f6a-0000-7000-8000-000000000002",
+      "kind": "hotp",
+      "issuer": "GitLab",
+      "account": "bob@example.com",
+      "secret": "SkJTV1kzRFBFSFBLM1BYUA==",
+      "algo": "SHA256",
+      "digits": 8,
+      "counter": 7,
+      "tagIds": [],
+      "note": "",
+      "sites": [],
+      "usageCount": 0,
+      "lastUsedAt": null,
+      "position": "a1",
+      "favorite": false,
+      "createdAt": 1737000000000,
+      "updatedAt": 1737000000000
+    }
+  ],
+  "tags": [
+    {
+      "id": "019c0f6a-0000-7000-8000-00000000000a",
+      "name": "工作",
+      "color": "#5B8DEF",
+      "position": "a0"
+    }
+  ],
+  "legacyFieldFromV0": "v0 时代的字段，迁移后必须原样保留"
+}
