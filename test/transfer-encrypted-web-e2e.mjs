@@ -1,4 +1,3 @@
-/* global console */
 // Issue #10：仅通过 dist 公开入口和真实 Web Provider 验收，独立 Node 原语作为对照。
 import assert from 'node:assert/strict'
 import { Buffer } from 'node:buffer'

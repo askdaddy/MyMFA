@@ -14,10 +14,6 @@
  * 错误提示不可区分，以及 C5「任何一端能解开其他端产出的 gzip 流」。
  */
 
-/* global console, process */
-// 根级 `test/` 不在 eslint.config.js 的 Node globals 配置里，脚本要打印结果与设置退出码，
-// 只能就地声明这两个全局（QA 不得改 eslint.config.js）。
-
 import assert from 'node:assert/strict'
 import { gunzipSync } from 'node:zlib'
 

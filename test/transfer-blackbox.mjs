@@ -14,7 +14,7 @@
  * dist 无 json、lint / typecheck / format）由 shell 命令取证，见 verify-report。
  */
 
-/* global console, process, URL, performance */
+/* global URL, performance */
 // 根级 `test/` 不在 eslint.config.js 的 Node globals 配置里（Issue #7 尚未落地），脚本要打印
 // 结果、设置退出码、解析夹具路径与计时，只能就地声明这四个全局（QA 不得改 eslint.config.js）。
 
