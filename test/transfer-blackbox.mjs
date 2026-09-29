@@ -2822,6 +2822,9 @@ test('C4：全部夹具跑一遍，收集到的文案不含任何夹具 secret �
     'freeotp_plus.json',
     'freeotp_plus_edge.json',
     'freeotp_plus_malformed.json',
+    'ga_normal.json',
+    'ga_edge.json',
+    'ga_malformed.json',
     'ente_auth.txt',
     'ente_edge.txt',
     'ente_jsonlines.txt',
@@ -2846,6 +2849,20 @@ test('C4：全部夹具跑一遍，收集到的文案不含任何夹具 secret �
   const texts = []
   const parsers = [T.parseAegis, T.parseTwoFas, T.parseFreeOtpPlus, T.parseEnte, T.parseBitwarden]
   for (const name of listed) {
+    if (name.startsWith('ga_')) {
+      for (const sample of JSON.parse(fixture(name)).cases) {
+        try {
+          const result = T.parseGaMigration(sample.uri)
+          texts.push(
+            ...result.failures.map((failure) => `${failure.path} ${failure.reason}`),
+            ...result.warnings.map((warning) => `${warning.field} ${warning.message}`),
+          )
+          for (const entry of result.entries) entry.secret.fill(0)
+        } catch (error) {
+          texts.push(error.message)
+        }
+      }
+    }
     for (const parse of parsers) {
       try {
         const result = parse(fixture(name))
@@ -2888,6 +2905,7 @@ test('C4：全部夹具跑一遍，收集到的文案不含任何夹具 secret �
   for (const secret of [SECRET_DENO, SECRET_WWE, SECRET_AIRCANADA]) {
     assertNoSecretLeak(texts, secret.base32, '全夹具文案扫描')
   }
+  assertNoSecretLeak(texts, 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ', 'GA 公开 RFC 夹具文案扫描')
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
