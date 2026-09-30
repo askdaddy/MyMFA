@@ -1,0 +1,1159 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > 2fas-edge > 2fas-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [
+        "工作",
+      ],
+      "value": 30,
+    },
+    {
+      "account": "张三@example.com",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "航空 Air Canada",
+      "kind": "totp",
+      "sourceIndex": 5,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "LinkDisagrees",
+      "kind": "totp",
+      "sourceIndex": 6,
+      "tagNames": [
+        "个人",
+      ],
+      "value": 50,
+    },
+  ],
+  "failures": [
+    {
+      "path": "services[1]",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 1,
+    },
+    {
+      "path": "services[2]",
+      "reason": "无法识别的 algorithm，仅支持 SHA1 / SHA256 / SHA512",
+      "sourceIndex": 2,
+    },
+    {
+      "path": "services[3]",
+      "reason": "totp 条目缺少 period",
+      "sourceIndex": 3,
+    },
+    {
+      "path": "services[4]",
+      "reason": "缺少 otp 对象",
+      "sourceIndex": 4,
+    },
+    {
+      "path": "services[7]",
+      "reason": "counter 必须是非负安全整数，实际为 -1",
+      "sourceIndex": 7,
+    },
+  ],
+  "format": "2fas",
+  "skipped": 0,
+  "tags": [
+    {
+      "name": "工作",
+      "sourceIndex": 0,
+    },
+    {
+      "name": "个人",
+      "sourceIndex": 1,
+    },
+  ],
+  "warnings": [
+    {
+      "field": "services[5].groupId",
+      "message": "引用的分组 id 在 groups 中不存在，已忽略该分组",
+      "sourceIndex": 5,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > 2fas-malformed > 2fas-malformed 1`] = `
+{
+  "error": "TransferFormatError",
+  "message": "2FAS 备份 已损坏：services 不是数组",
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > 2fas-normal > 2fas-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Issuu",
+      "kind": "hotp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 1,
+    },
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "Air Canada",
+      "kind": "hotp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 10300,
+    },
+  ],
+  "failures": [
+    {
+      "path": "services[4]",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 4,
+    },
+  ],
+  "format": "2fas",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > aegis-edge > aegis-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "张三 a:b/c%d+e f",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "航空 Air Canada",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 8,
+      "issuer": "MD5",
+      "kind": "totp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 6,
+      "issuer": "HmacPrefix",
+      "kind": "totp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 30,
+    },
+  ],
+  "failures": [
+    {
+      "path": "db.entries[1]",
+      "reason": "db.entries[1].note 长度为 5000，超过上限 4096",
+      "sourceIndex": 1,
+    },
+    {
+      "path": "db.entries[4]",
+      "reason": "digits 必须是 6–8 的整数，实际为 10",
+      "sourceIndex": 4,
+    },
+    {
+      "path": "db.entries[5]",
+      "reason": "totp 条目缺少 period",
+      "sourceIndex": 5,
+    },
+    {
+      "path": "db.entries[6]",
+      "reason": "hotp 条目缺少 counter",
+      "sourceIndex": 6,
+    },
+    {
+      "path": "db.entries[7]",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 7,
+    },
+    {
+      "path": "db.entries[8]",
+      "reason": "db.entries[8].name 必须是字符串，实际收到的类型是 undefined",
+      "sourceIndex": 8,
+    },
+  ],
+  "format": "aegis",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "db.entries[2].info.algo",
+      "message": "原文是 MD5，已归一化为 SHA1",
+      "sourceIndex": 2,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > aegis-malformed > aegis-malformed 1`] = `
+{
+  "error": "TransferFormatError",
+  "message": "Aegis 备份 已损坏：db.entries 不是数组",
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > aegis-normal > aegis-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 20,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Issuu",
+      "kind": "hotp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 1,
+    },
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "Air Canada",
+      "kind": "hotp",
+      "sourceIndex": 4,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 5,
+      "tagNames": [],
+      "value": 10300,
+    },
+  ],
+  "failures": [
+    {
+      "path": "db.entries[6]",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 6,
+    },
+  ],
+  "format": "aegis",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > bitwarden-edge > bitwarden-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "alice@example.com",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [
+        "Work/Servers",
+      ],
+      "value": 30,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 10300,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 7,
+      "tagNames": [
+        "Personal",
+      ],
+      "value": 20,
+    },
+  ],
+  "failures": [
+    {
+      "path": "Bitwarden CSV 第 5 行",
+      "reason": "URI 缺少 counter 参数",
+      "sourceIndex": 2,
+    },
+    {
+      "path": "Bitwarden CSV 第 7 行",
+      "reason": "Steam 令牌不受支持：本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 4,
+    },
+  ],
+  "format": "bitwarden",
+  "skipped": 2,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "digits",
+      "message": "totp 是裸 base32，不含 digits，已按 Bitwarden 的默认值 6 补齐",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "period",
+      "message": "totp 是裸 base32，不含 period，已按 Bitwarden 的默认值 30 补齐",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "algorithm",
+      "message": "totp 是裸 base32，不含 algorithm，已按 Bitwarden 的默认值 SHA1 补齐",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "username",
+      "message": "username 列与 totp 中 URI 的 account 不一致，已采用 URI 的值",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "username",
+      "message": "username 列与 totp 中 URI 的 account 不一致，已采用 URI 的值",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "username",
+      "message": "username 列与 totp 中 URI 的 account 不一致，已采用 URI 的值",
+      "sourceIndex": 7,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > bitwarden-malformed > bitwarden-malformed 1`] = `
+{
+  "entries": [
+    {
+      "account": "",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Ok",
+      "kind": "totp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 30,
+    },
+  ],
+  "failures": [
+    {
+      "path": "Bitwarden CSV 第 2 行",
+      "reason": "该行有 4 个字段，与表头的 5 列不符",
+      "sourceIndex": 0,
+    },
+    {
+      "path": "Bitwarden CSV 第 3 行",
+      "reason": "该行有 7 个字段，与表头的 5 列不符",
+      "sourceIndex": 1,
+    },
+  ],
+  "format": "bitwarden",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "digits",
+      "message": "login_totp 是裸 base32，不含 digits，已按 Bitwarden 的默认值 6 补齐",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "period",
+      "message": "login_totp 是裸 base32，不含 period，已按 Bitwarden 的默认值 30 补齐",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "algorithm",
+      "message": "login_totp 是裸 base32，不含 algorithm，已按 Bitwarden 的默认值 SHA1 补齐",
+      "sourceIndex": 2,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > bitwarden-normal > bitwarden-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 20,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 50,
+    },
+  ],
+  "failures": [
+    {
+      "path": "Bitwarden CSV 第 5 行",
+      "reason": "Steam 令牌不受支持：本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 3,
+    },
+  ],
+  "format": "bitwarden",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "name",
+      "message": "name 列与 login_totp 中 URI 的 issuer 不一致，已采用 URI 的值",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "name",
+      "message": "name 列与 login_totp 中 URI 的 issuer 不一致，已采用 URI 的值",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "name",
+      "message": "name 列与 login_totp 中 URI 的 issuer 不一致，已采用 URI 的值",
+      "sourceIndex": 2,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ente-edge > ente-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 10300,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 20,
+    },
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "Air Canada",
+      "kind": "hotp",
+      "sourceIndex": 4,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Issuu",
+      "kind": "hotp",
+      "sourceIndex": 6,
+      "tagNames": [],
+      "value": 1,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "DoubleEncoded",
+      "kind": "totp",
+      "sourceIndex": 7,
+      "tagNames": [
+        "工作",
+        "个人",
+      ],
+      "value": 30,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Fragment",
+      "kind": "totp",
+      "sourceIndex": 8,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 10,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [
+        "工作",
+        "个人",
+      ],
+      "value": 30,
+    },
+  ],
+  "failures": [
+    {
+      "path": "Ente 明文导出 第 6 行",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 5,
+    },
+    {
+      "path": "Ente 明文导出 第 10 行",
+      "reason": "URI 缺少 secret 参数",
+      "sourceIndex": 9,
+    },
+  ],
+  "format": "ente",
+  "skipped": 1,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.iconSrc",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.iconID",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.trashed",
+      "message": "该条目在 Ente 中已被删除，已跳过不导入",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "codeDisplay.iconSrc",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "codeDisplay.iconID",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 2,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.iconSrc",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.iconID",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.iconSrc",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.iconID",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay",
+      "message": "不是合法的 JSON，已按默认值处理，该条目的 note / tags / trashed / position 全部丢失",
+      "sourceIndex": 6,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 7,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 8,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ente-malformed > ente-malformed 1`] = `
+{
+  "entries": [],
+  "failures": [
+    {
+      "path": "Ente 明文导出 第 1 行",
+      "reason": "不是 otpauth URI：缺少 scheme 与 "//"",
+      "sourceIndex": 0,
+    },
+  ],
+  "format": "ente",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ente-normal > ente-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "Air Canada",
+      "kind": "hotp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 30,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Issuu",
+      "kind": "hotp",
+      "sourceIndex": 4,
+      "tagNames": [],
+      "value": 1,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 5,
+      "tagNames": [],
+      "value": 20,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 6,
+      "tagNames": [],
+      "value": 10300,
+    },
+  ],
+  "failures": [
+    {
+      "path": "Ente 明文导出 第 3 行",
+      "reason": "该令牌类型不受支持："steam"，本 App 只支持 TOTP 与 HOTP",
+      "sourceIndex": 2,
+    },
+  ],
+  "format": "ente",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 0,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 1,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 3,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 4,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 5,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 5,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 5,
+    },
+    {
+      "field": "codeDisplay.pinned",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 6,
+    },
+    {
+      "field": "codeDisplay.tapCount",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 6,
+    },
+    {
+      "field": "codeDisplay.lastUsedAt",
+      "message": "该字段未导入（本 App 暂不保留这项信息）",
+      "sourceIndex": 6,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > freeotp-edge > freeotp-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason Alt",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno Alt",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [
+        "工作",
+      ],
+      "value": 30,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 10300,
+    },
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "",
+      "kind": "hotp",
+      "sourceIndex": 2,
+      "tagNames": [
+        "个人",
+      ],
+      "value": 50,
+    },
+  ],
+  "failures": [],
+  "format": "freeotp-plus",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "tokenOrder",
+      "message": "缺少 tokenOrder，已按 tokens 数组顺序导入（可能与 FreeOTP+ 中看到的顺序不同）",
+      "sourceIndex": null,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > freeotp-malformed > freeotp-malformed 1`] = `
+{
+  "entries": [],
+  "failures": [
+    {
+      "path": "tokens[0]",
+      "reason": "secret 数组的第 0 项不是 [-128,127] 范围内的整数",
+      "sourceIndex": 0,
+    },
+    {
+      "path": "tokens[1]",
+      "reason": "secret 必须是数组，实际收到的类型是 string",
+      "sourceIndex": 1,
+    },
+  ],
+  "format": "freeotp-plus",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "tokenOrder",
+      "message": "有 1 个条目未被 tokenOrder 引用，已追加到末尾（FreeOTP+ 自身会丢弃它们）",
+      "sourceIndex": null,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > freeotp-normal > freeotp-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "Mason",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "WWE",
+      "kind": "hotp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 10299,
+    },
+    {
+      "account": "Benjamin",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "Air Canada",
+      "kind": "hotp",
+      "sourceIndex": 1,
+      "tagNames": [],
+      "value": 49,
+    },
+    {
+      "account": "James",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Issuu",
+      "kind": "hotp",
+      "sourceIndex": 2,
+      "tagNames": [],
+      "value": 0,
+    },
+    {
+      "account": "Elijah",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "Airbnb",
+      "kind": "totp",
+      "sourceIndex": 3,
+      "tagNames": [],
+      "value": 50,
+    },
+    {
+      "account": "James",
+      "algo": "SHA256",
+      "digits": 7,
+      "issuer": "SPDX",
+      "kind": "totp",
+      "sourceIndex": 4,
+      "tagNames": [],
+      "value": 20,
+    },
+    {
+      "account": "Mason",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Deno",
+      "kind": "totp",
+      "sourceIndex": 5,
+      "tagNames": [],
+      "value": 30,
+    },
+  ],
+  "failures": [],
+  "format": "freeotp-plus",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ga-edge > ga-edge 1`] = `
+{
+  "entries": [
+    {
+      "account": "Synthetic:中文/+%:账户",
+      "algo": "SHA512",
+      "digits": 8,
+      "issuer": "中文:发行方",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+  ],
+  "failures": [],
+  "format": "ga-migration",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "period",
+      "message": "GA 格式没有 period 字段，按来源格式恢复为 30 秒",
+      "sourceIndex": 0,
+    },
+  ],
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ga-malformed > ga-malformed 1`] = `
+{
+  "error": "TransferFormatError",
+  "message": "GA protobuf varint 截断或溢出",
+}
+`;
+
+exports[`一手夹具的版本化 golden 快照（不记录 secret） > ga-normal > ga-normal 1`] = `
+{
+  "entries": [
+    {
+      "account": "alice@example.test",
+      "algo": "SHA1",
+      "digits": 6,
+      "issuer": "Synthetic",
+      "kind": "totp",
+      "sourceIndex": 0,
+      "tagNames": [],
+      "value": 30,
+    },
+  ],
+  "failures": [],
+  "format": "ga-migration",
+  "skipped": 0,
+  "tags": [],
+  "warnings": [
+    {
+      "field": "period",
+      "message": "GA 格式没有 period 字段，按来源格式恢复为 30 秒",
+      "sourceIndex": 0,
+    },
+  ],
+}
+`;

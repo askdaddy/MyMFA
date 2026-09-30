@@ -29,6 +29,8 @@ catalog:
   argon2: 0.45.1
   fractional-indexing: 4.0.0
   pinyin-pro: 3.29.4
+  # 仅用于 transfer 的固定种子属性/模糊测试，不进入发布产物。
+  fast-check: 4.10.2
 
 # 由 pnpm 自动写入：全局配置启用了 minimumReleaseAge（新发布包需冷却期，供应链防护），
 # prettier 3.9.9 发布时间过近被显式豁免。升级 prettier 后可删除此项让 pnpm 重新评估。
