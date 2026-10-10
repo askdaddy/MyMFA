@@ -433,8 +433,12 @@ export default defineBackground(() => {
       sendResponse({ ok: false, error: '无法识别的请求' } satisfies Reply)
       return false
     }
-    void store.touchActivity()
-    enqueue(() => handleRequest(request)).then(
+    // touchActivity 必须与该消息的处理串行：fire-and-forget 会在 lock 清除 session 后
+    // 把并发读到的旧 DEK 写回去，让解锁态复活（QA 第 1 轮缺陷 B）。
+    enqueue(async () => {
+      await store.touchActivity()
+      return handleRequest(request)
+    }).then(
       (value) => sendResponse({ ok: true, value } satisfies Reply),
       (error: unknown) => sendResponse({ ok: false, error: safeError(error) } satisfies Reply),
     )

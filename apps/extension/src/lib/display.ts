@@ -95,7 +95,8 @@ export async function buildDisplayList(
     }
   }
 
-  const now = Date.now()
+  // @askdaddy/otp 的契约入参是 Unix 秒；毫秒会让计数器放大 1000 倍（QA 缺陷 A）。
+  const now = Math.floor(Date.now() / 1000)
   return Promise.all(
     entries.map(async (entry): Promise<DisplayEntry> => {
       const codes = await computeCodes(entry, now, data.settings.clockOffsetSeconds)
