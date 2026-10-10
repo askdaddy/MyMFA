@@ -14,6 +14,7 @@ import {
 import type { AeadSealed, Argon2idParams } from '@askdaddy/crypto'
 
 import { VaultAuthError, VaultFormatError, VaultLockedError } from './errors.js'
+import { assertVaultData } from './guard.js'
 import { assertContainerVersion, migrateVaultData } from './migrate.js'
 import {
   CONTAINER_FORMAT,
@@ -145,12 +146,13 @@ async function wrapDek(
 function createHandle(
   providers: VaultProviders,
   dek: Uint8Array,
-  data: VaultData,
+  initialData: VaultData,
   initialKdf: KdfHeader,
   initialWrapped: WrappedKeyHeader,
 ): VaultHandle {
   let kdf = initialKdf
   let wrappedMasterKey = initialWrapped
+  let data = initialData
   let locked = false
 
   function assertUnlocked(action: string): void {
@@ -161,6 +163,16 @@ function createHandle(
     get data(): VaultData {
       assertUnlocked('读取数据')
       return data
+    },
+
+    replaceData(next: VaultData): void {
+      assertUnlocked('修改数据')
+      data = assertVaultData(next)
+    },
+
+    sessionDek(): Uint8Array {
+      assertUnlocked('读取会话密钥')
+      return new Uint8Array(dek)
     },
 
     async serialize(): Promise<Uint8Array> {
@@ -464,6 +476,29 @@ export async function openVault(
       dek.fill(0)
       throw error
     }
+  } finally {
+    zeroAll(header.spent)
+  }
+}
+
+export async function openVaultWithDek(
+  bytes: Uint8Array,
+  sessionDek: Uint8Array,
+  providers: VaultProviders,
+): Promise<VaultHandle> {
+  if (!(sessionDek instanceof Uint8Array) || sessionDek.byteLength !== DEK_LENGTH) {
+    throw new VaultAuthError()
+  }
+  const header = readHeader(bytes, providers)
+  const dek = new Uint8Array(sessionDek)
+  try {
+    const plaintext = await readPayload(dek, header, providers)
+    if (plaintext.schemaVersion !== header.schemaVersion) throw new VaultAuthError()
+    const data = migrateVaultData(plaintext)
+    return createHandle(providers, dek, data, header.kdf, header.wrappedMasterKey)
+  } catch (error) {
+    dek.fill(0)
+    throw error
   } finally {
     zeroAll(header.spent)
   }

@@ -159,6 +159,8 @@ export interface CreateVaultOptions {
 export interface VaultHandle {
   /** 锁定后访问抛 `VaultLockedError`（`docs/vault-format.md` §1.1，B8）。 */
   readonly data: VaultData
+  replaceData(next: VaultData): void
+  sessionDek(): Uint8Array
   serialize(): Promise<Uint8Array>
   /**
    * 只重新派生 KEK 并重新包裹 DEK，payload 一概不碰——O(1) 而非 O(n)。

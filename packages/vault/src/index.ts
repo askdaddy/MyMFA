@@ -1,4 +1,4 @@
-export { createVault, openVault } from './container.js'
+export { createVault, openVault, openVaultWithDek } from './container.js'
 export {
   VaultAuthError,
   VaultFormatError,
