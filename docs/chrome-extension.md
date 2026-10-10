@@ -32,6 +32,7 @@ apps/extension/
   src/
     entrypoints/
       background.ts      # service worker：解锁态管理、定时清理
+      offscreen.html      # 剪贴板清理所需的隐藏文档；仅处理剪贴板消息
       popup/             # React，主界面
       options/           # React，导入导出与设置
     lib/                 # 仅 Web 侧适配：Provider 注入、storage 封装
@@ -44,6 +45,7 @@ apps/extension/
 | **background service worker** | 持有解锁态、响应 popup 的加解密请求、`chrome.alarms` 空闲锁定、导入导出时的重计算任务 |
 | **popup**                     | 列表 UI、搜索、复制、倒计时刷新。生命周期短，打开即渲染、关闭即销毁                   |
 | **options page**              | 导入导出、主密码修改、设置、条目管理（popup 空间太小，重操作放这里）                  |
+| **offscreen document**        | 接收定时清理请求，仅在剪贴板仍为本次复制的验证码时清空；可行性须经真实 Chrome 验证    |
 
 **为什么把加解密放 background**：Argon2id 派生在 WASM 下耗时可达数百毫秒至 1 秒，放 popup 会阻塞渲染且 popup 随时可能被销毁。放 SW 中执行，popup 通过 `chrome.runtime.sendMessage` 请求，SW 保持 DEK 与派生结果。
 
@@ -52,7 +54,7 @@ apps/extension/
 ```jsonc
 {
   "manifest_version": 3,
-  "permissions": ["storage", "activeTab", "clipboardWrite", "alarms"],
+  "permissions": ["storage", "activeTab", "clipboardWrite", "clipboardRead", "alarms", "offscreen"],
   "host_permissions": [], // 刻意留空
 }
 ```
@@ -62,12 +64,16 @@ apps/extension/
 | `storage`          | `local` 存加密 vault blob，`session` 存解锁态 DEK | ✅                                           |
 | `activeTab`        | popup 打开时读取当前标签页 URL 做域名匹配         | ✅                                           |
 | `clipboardWrite`   | 点击复制验证码                                    | ✅                                           |
+| `clipboardRead`    | 到期前比对剪贴板，避免清除用户后来复制的内容      | ✅；会显示读取剪贴板数据的安装警示           |
 | `alarms`           | 空闲自动锁定                                      | 可选（不用则退化为 SW 内计时，会被回收打断） |
+| `offscreen`        | popup 关闭后创建隐藏文档处理剪贴板                | ✅；不承载 vault 或 OTP 逻辑                 |
 | `host_permissions` | —                                                 | ❌ **不申请**                                |
 
 **关键设计**：用 `activeTab` 而不是 `<all_urls>` 读取当前页域名。`activeTab` 只在用户主动点击扩展图标时授予当前标签页的一次性访问权，正好匹配我们的场景（用户点开 popup 时才需要知道当前站点）。这样既不申请宽权限，也能通过 Chrome Web Store 的权限审查——**权限申请越少，商店审核越快，用户安装转化率越高**。
 
 **不注入 content script**。V1 完全不碰页面 DOM，这既降低安全风险，也避免与页面脚本冲突。
+
+点击复制后默认在 45 秒后尝试清理，可在设置中关闭。alarm 到期时由 background 请求 offscreen 文档读取当前剪贴板；仅当文本仍等于本次复制的验证码时才清空。读取失败时不得盲清，也不得改写用户后来复制的内容。offscreen 文档只为这次剪贴板操作短时存在，不持有 vault、DEK 或主密码。MV3 service worker 没有 DOM，且非聚焦的 offscreen 文档可能无法使用 `navigator.clipboard.readText()`；开发须先用假验证码在真实 Chrome 验证读取、比对与清理路径，再把该路径用于正式功能。若实机验证失败，回到 Issue #6 的计划阶段修订方案，不降低本节的安全保证。
 
 ## 4. 域名绑定与自动置顶
 
