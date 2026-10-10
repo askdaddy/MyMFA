@@ -25,12 +25,15 @@ async function importKey(key: Uint8Array, usage: KeyUsage): Promise<CryptoKey> {
 }
 
 function gcmParams(iv: Uint8Array, aad: Uint8Array | undefined): AesGcmParams {
-  return {
+  const params: AesGcmParams = {
     name: ALGORITHM,
     iv: bufferSource(iv),
-    additionalData: aad === undefined ? undefined : bufferSource(aad),
     tagLength: AES_256_GCM.tagLength * 8,
   }
+  // MV3 service worker 的 WebCrypto 会把显式的 additionalData: undefined 判为
+  // BufferSource 类型错误（普通页面与 Node 都接受），缺省时必须整个省略该键。
+  if (aad !== undefined) params.additionalData = bufferSource(aad)
+  return params
 }
 
 export const webAeadProvider: AeadProvider = {
