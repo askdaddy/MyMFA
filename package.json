@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "test": "turbo run test",
     "test:cross": "turbo run test:cross",
+    "ext:dev": "pnpm --filter @askdaddy/extension dev",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

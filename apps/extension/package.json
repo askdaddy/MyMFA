@@ -1,0 +1,30 @@
+{
+  "name": "@askdaddy/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@askdaddy/crypto": "workspace:*",
+    "@askdaddy/crypto-web": "workspace:*",
+    "@askdaddy/domain": "workspace:*",
+    "@askdaddy/otp": "workspace:*",
+    "@askdaddy/transfer": "workspace:*",
+    "@askdaddy/vault": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@wxt-dev/module-react": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:",
+    "wxt": "catalog:"
+  }
+}
