@@ -39,6 +39,15 @@ catalog:
   '@types/react-dom': 19.3.0
   playwright: 1.63.0
 
+# apps/mobile 的 Expo SDK 58 线（2026-11-05 npm registry 实测的 create-expo-app 官方配对）。
+# react 与 @types/react 当前官方配对值（19.3.0）与 web 线一致，复用上方默认 catalog，
+# 不在本表重复登记；typescript 亦复用仓内 5.9.3 钉死版（typescript-eslint peer 约束，
+# 见上注释），不采用模板的 ~6.0.3。SDK 升级时本表随官方配对整体移动。
+catalogs:
+  mobile:
+    expo: ~58.0.23
+    react-native: 0.88.1
+
 # 由 pnpm 自动写入：全局配置启用了 minimumReleaseAge（新发布包需冷却期，供应链防护），
 # prettier 3.9.9 发布时间过近被显式豁免。升级 prettier 后可删除此项让 pnpm 重新评估。
 minimumReleaseAgeExclude:

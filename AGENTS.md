@@ -29,7 +29,8 @@ git 已初始化，分支 `main`，远端 `git@github.com:askdaddy/MyMFA.git`。
 - ✅ `packages/crypto`：KDF / AEAD / 随机数 / 安全存储四个 Provider 接口、Argon2id 与 AES-256-GCM 参数常量、纯 TS 的 base64 与 UTF-8、三端共用参考向量
 - ✅ `packages/crypto-web`：Web Provider（hash-wasm Argon2id KDF / WebCrypto AES-256-GCM AEAD / 随机数）与一致性验证（RFC 9106 KAT + node-argon2 对照 + OpenSSL 双向比对）；`SecureStore` 未实现，随 Chrome 扩展一并落地
 - ✅ `packages/vault`：数据模型与手写类型守卫、UUID v7、schema 迁移链、双层密钥模型（Argon2id 派生 KEK 包裹随机 DEK）、AES-256-GCM 加密容器读写、O(1) 改主密码、锁定时清零
-- ⬜ `transfer` / `domain`、全部 apps
+- ⬜ `transfer`、其余 apps
+- ✅ `apps/mobile` RN 脚手架：Expo prebuild + Android 原生模块骨架（#18）；Provider 属 #19、UI 属 #20+、iOS 属 #16 阶段 B
 
 vault 层**尚未**包含以下能力，别在这里找：
 
@@ -59,7 +60,7 @@ packages/
   transfer/    ⬜ @askdaddy/transfer   导入导出格式解析器与生成器、格式探测器（零平台依赖）
   domain/      ✅ @askdaddy/domain     排序、搜索、tag、使用统计、域名匹配（零平台依赖）
 apps/
-  mobile/     ⬜ React Native（Expo prebuild + 自定义原生模块 + 原生 Argon2id Provider）
+  mobile/     ✅ @askdaddy/mobile     RN 脚手架已落地（Expo prebuild + 本地 Expo module；Argon2id Provider 属 #19）
   extension/  ⬜ Chrome MV3 扩展（WXT 脚手架 + chrome.storage SecureStore）
   desktop/    ⬜ Tauri（后期阶段，暂不创建）
 docs/         ✅ 设计文档
@@ -85,13 +86,13 @@ test/         ⬜ QA 黑盒测试脚本
 | `pnpm format` / `format:check` | Prettier 写入 / 校验                                                                                     |
 | `pnpm test`                    | Vitest 单元测试（含 RFC 官方测试向量）                                                                   |
 | `pnpm test:cross`              | **跨端加密一致性测试**（Argon2id/AES-GCM 字节级比对）；当前覆盖 Web 端，Android/iOS 待 M3 接入同一份基线 |
+| `pnpm mobile:start`            | 启动 apps/mobile 的 Expo dev server                                                                      |
 
 规划中，尚未实现：
 
-| 命令                | 作用                      |
-| ------------------- | ------------------------- |
-| `pnpm mobile:start` | 启动 RN 开发服务          |
-| `pnpm ext:dev`      | 启动扩展开发构建（watch） |
+| 命令           | 作用                      |
+| -------------- | ------------------------- |
+| `pnpm ext:dev` | 启动扩展开发构建（watch） |
 
 `pnpm lint` 只在根级运行：ESLint flat config 集中在 `eslint.config.js`，规则按路径分域，分包运行反而会漏掉跨包规则。
 

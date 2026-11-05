@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "test:cross": "turbo run test:cross",
     "ext:dev": "pnpm --filter @askdaddy/extension dev",
+    "mobile:start": "pnpm --filter @askdaddy/mobile start",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

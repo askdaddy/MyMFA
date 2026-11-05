@@ -234,6 +234,17 @@ export default tseslint.config(
   },
 
   {
+    // apps/mobile 的平台禁令（#18 spec C3）：react-native / expo 的 import 天然放行
+    // （import 禁令只作用于 packages/*），但 Node / 浏览器全局仍禁——Hermes 两者皆无，
+    // 平台能力必须经注入的 Provider 或原生模块获得。在 Node 里运行的配置文件
+    // （metro.config / app.config 等）由下方的 config override 豁免。
+    files: ['apps/mobile/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-globals': ['error', ...PLATFORM_GLOBALS],
+    },
+  },
+
+  {
     // 测试夹具需要一个真实的 HMAC / 随机数实现充当被测代码的对照，只能用 Node 内置模块。
     // 测试不进入发布产物（tsconfig.build.json 已排除），发布代码的平台无关性由
     // build 配置的 types:[] 与 packages/* 的受限规则共同保证。
