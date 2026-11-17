@@ -12,14 +12,16 @@
  *   node test/mobile-vault-providers.mjs --broken   负向对照：KDF 注入点必须让测试失败
  */
 import { spawnSync } from 'node:child_process'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const broken = process.argv.includes('--broken')
 const config = 'test/mobile/vitest.config.mts'
 // vitest 是各 package 的 devDependency，不提升到根 node_modules；直接借 vault 的解析结果，
 // 避免为一条 QA 脚本改动根 package.json。
-const vitestBin = fileURLToPath(
-  new URL('../packages/vault/node_modules/vitest/vitest.mjs', import.meta.url),
+const vitestBin = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../packages/vault/node_modules/vitest/vitest.mjs',
 )
 
 const result = spawnSync(

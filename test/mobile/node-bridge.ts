@@ -92,7 +92,12 @@ export const nodeBridge: NativeCryptoBridge = {
     if (aad !== undefined) cipher.setAAD(Buffer.from(aad))
     // 与原生一致：nonce(12) ‖ ciphertext ‖ tag(16) 单段返回。
     return new Uint8Array(
-      Buffer.concat([nonce, cipher.update(Buffer.from(plaintext)), cipher.final(), cipher.getAuthTag()]),
+      Buffer.concat([
+        nonce,
+        cipher.update(Buffer.from(plaintext)),
+        cipher.final(),
+        cipher.getAuthTag(),
+      ]),
     )
   },
 
