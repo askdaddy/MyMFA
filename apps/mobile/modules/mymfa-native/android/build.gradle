@@ -11,8 +11,28 @@ android {
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
+    // 仪器化 KAT（#19 步骤 6）依赖 AndroidJUnit4 运行器；不设这项 AGP 会用已废弃的
+    // android.test.InstrumentationTestRunner，跑起来直接报「找不到 instrumentation info」。
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   lintOptions {
     abortOnError false
   }
+}
+
+// Expo 模板生成的 android/build.gradle 已在 allprojects 里声明 JitPack；这里再写一份是为了
+// 让本模块的依赖来源自解释（换脚手架时不会静默丢掉 argon2kt 的仓库）。
+repositories {
+  maven { url 'https://www.jitpack.io' }
+}
+
+dependencies {
+  // ADR-021（#17 研究结论，2026-10-20）：Argon2id 走 Argon2Kt（MIT，JNI 封装 phc-winner-argon2
+  // 参考实现，四 ABI 预编译）；scrypt 走 Bouncy Castle（MIT，RFC 7914）。两者版本与 #17 的
+  // Android gate 保持一致，升级必须同步 ADR 与跨端比对。
+  implementation("com.github.lambdapioneer:argon2kt:v1.2.0")
+  implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
+
+  androidTestImplementation("androidx.test.ext:junit:1.2.1")
+  androidTestImplementation("androidx.test:runner:1.6.2")
 }
