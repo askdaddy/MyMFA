@@ -11,6 +11,9 @@ android {
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
+    // 仪器化 KAT（#19 步骤 6）依赖 AndroidJUnit4 运行器；不设这项 AGP 会用已废弃的
+    // android.test.InstrumentationTestRunner，跑起来直接报「找不到 instrumentation info」。
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
   }
   lintOptions {
     abortOnError false
